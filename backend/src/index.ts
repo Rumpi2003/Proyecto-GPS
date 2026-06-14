@@ -14,6 +14,14 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Servidor PERN con Typescript funcionando!');
 });
 
+app.get('/api/status', (req: Request, res: Response) => {
+  res.json({
+    status: 'ok',
+    message: 'API funcionando correctamente',
+    timestamp: new Date().toISOString(),
+  });
+});  
+
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
