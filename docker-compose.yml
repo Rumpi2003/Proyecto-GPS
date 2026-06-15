@@ -25,6 +25,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: mydb
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
     ports:
       - "5000:5000"
     depends_on:
@@ -38,6 +39,7 @@ services:
       - "5173:5173"
     environment:
       VITE_API_URL: "http://localhost:5000/api"
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
     depends_on:
       - backend
 
