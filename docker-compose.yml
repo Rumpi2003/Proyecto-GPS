@@ -35,11 +35,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
     ports:
       - "5173:5173"
     environment:
       VITE_API_URL: "http://localhost:5000/api"
-      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+      VITE_GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
     depends_on:
       - backend
 
