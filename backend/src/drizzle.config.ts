@@ -1,5 +1,5 @@
 export default {
-  schema: './schemas/schema.index.ts',
+  schema: './schemas/entities.index.ts',
   out: './drizzle/migrations',
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
