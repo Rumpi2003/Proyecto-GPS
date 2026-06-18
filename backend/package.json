@@ -9,7 +9,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
-    "migrate:generate": "drizzle-kit generate --schema ./src/db/schemas/schema.index.ts --out ./drizzle/migrations",
+    "migrate:generate": "drizzle-kit generate --config ./drizzle.config.ts",
     "migrate:push": "drizzle-kit push --config ./drizzle.config.ts"
   },
   "keywords": [],

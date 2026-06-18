@@ -1,6 +1,11 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 export default {
-  schema: './schemas/entities.index.ts',
+  schema: './src/entities/entities.index.ts',
   out: './drizzle/migrations',
+  dialect: 'postgresql',
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
   user: process.env.DB_USER,
