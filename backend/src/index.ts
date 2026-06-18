@@ -1,12 +1,19 @@
+import 'reflect-metadata';
 import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import pool from './config/db.js';
 import routerApi from './routes/index.routes.js';
+import { AppDataSource } from './config/db.config.js';
 
 dotenv.config();
+
+AppDataSource.initialize().then(() => {
+  console.log('Conexión a la base de datos establecida');
+}).catch((error) => {
+  console.error('Error al conectar a la base de datos:', error);
+});
 
 const app = express();
 const PORT = process.env.PORT || 5000;
