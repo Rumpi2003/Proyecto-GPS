@@ -2,6 +2,11 @@ import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
 import { Usuario } from '../entities/usuario.entity.js';
+import { Publicacion } from '../entities/publicacion.entity.js';
+import { Comentario } from '../entities/comentario.entity.js';
+import { Etiqueta } from '../entities/etiqueta.entity.js';
+import { Cercania } from '../entities/cercania.entity.js';
+import { Universidad } from '../entities/universidad.entity.js';
 
 dotenv.config();
 
@@ -20,5 +25,5 @@ export const AppDataSource = new DataSource({
   database: getEnvVar('DB_NAME'),
   synchronize: true,
   migrations: ['dist/migrations/*.{js,mjs,cjs}'],
-  entities: [Usuario],
+  entities: [Usuario, Publicacion, Comentario, Etiqueta, Cercania, Universidad],
 });

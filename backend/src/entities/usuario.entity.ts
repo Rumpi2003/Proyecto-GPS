@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Publicacion } from './publicacion.entity.js';
+import { Comentario } from './comentario.entity.js';
 
 @Entity({ name: 'usuario' })
 export class Usuario {
@@ -16,4 +18,10 @@ export class Usuario {
 
   @Column({ type: 'varchar', length: 50 })
   rol!: string;
+
+  @OneToMany(() => Publicacion, (publicacion) => publicacion.publicante)
+  publicaciones!: Publicacion[];
+
+  @OneToMany(() => Comentario, (comentario) => comentario.usuario)
+  comentarios!: Comentario[];
 }
