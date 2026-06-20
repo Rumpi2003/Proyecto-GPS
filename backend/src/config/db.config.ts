@@ -7,6 +7,9 @@ import { Comentario } from '../entities/comentario.entity.js';
 import { Etiqueta } from '../entities/etiqueta.entity.js';
 import { Cercania } from '../entities/cercania.entity.js';
 import { Universidad } from '../entities/universidad.entity.js';
+import { Valoracion } from '../entities/valoracion.entity.js';
+import { Reporte } from '../entities/reporte.entity.js';
+import { Foto } from '../entities/foto.entity.js';
 
 dotenv.config();
 
@@ -25,5 +28,5 @@ export const AppDataSource = new DataSource({
   database: getEnvVar('DB_NAME'),
   synchronize: true,
   migrations: ['dist/migrations/*.{js,mjs,cjs}'],
-  entities: [Usuario, Publicacion, Comentario, Etiqueta, Cercania, Universidad],
+  entities: [Usuario, Publicacion, Comentario, Etiqueta, Cercania, Universidad, Valoracion, Reporte, Foto],
 });

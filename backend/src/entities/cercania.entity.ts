@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, PrimaryColumn } from 'typeorm';
 import { Publicacion } from './publicacion.entity.js';
 import { Universidad } from './universidad.entity.js';
 import type { Publicacion as PublicacionType } from './publicacion.entity.js';
@@ -6,8 +6,11 @@ import type { Universidad as UniversidadType } from './universidad.entity.js';
 
 @Entity({ name: 'cercania' })
 export class Cercania {
-	@PrimaryGeneratedColumn({ name: 'id_cercania', type: 'int' })
-	id_cercania!: number;
+	@PrimaryColumn({ name: 'id_publicacion', type: 'int' })
+	id_publicacion!: number;
+
+	@PrimaryColumn({ name: 'id_universidad', type: 'int' })
+	id_universidad!: number;
 
 	@ManyToOne(() => Publicacion, (publicacion) => publicacion.cercanias, { nullable: false, onDelete: 'CASCADE' })
 	@JoinColumn({ name: 'id_publicacion' })
@@ -18,5 +21,5 @@ export class Cercania {
 	universidad!: UniversidadType;
 
 	@Column({ type: 'int' })
-	distancia!: number;
+	distancia_metros!: number;
 }

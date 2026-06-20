@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Cercania } from './cercania.entity.js';
+import type { Cercania as CercaniaType } from './cercania.entity.js';
 
 @Entity({ name: 'universidad' })
 export class Universidad {
@@ -7,10 +8,10 @@ export class Universidad {
 	id_universidad!: number;
 
 	@Column({ type: 'varchar', length: 255 })
-	nombre!: string;
+	nombre_universidad!: string;
 
-	@Column({ name: 'ciudad_comuna', type: 'varchar', length: 255 })
-	ciudadComuna!: string;
+	@Column({ name: 'comuna', type: 'varchar', length: 255 })
+	comuna!: string;
 
 	@Column({ type: 'varchar', length: 255 })
 	calle!: string;
@@ -18,12 +19,9 @@ export class Universidad {
 	@Column({ type: 'varchar', length: 50 })
 	numero!: string;
 
-	@Column({ type: 'varchar', length: 255 })
-	latitud!: string;
-
-	@Column({ type: 'varchar', length: 255 })
-	longitud!: string;
+	@Column({ type: 'geography', spatialFeatureType: 'Point', srid: 4326 })
+	coordenadas!: string;
 
 	@OneToMany(() => Cercania, (cercania) => cercania.universidad)
-	cercanias!: Cercania[];
+	cercanias!: CercaniaType[];
 }

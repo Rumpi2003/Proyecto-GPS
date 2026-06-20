@@ -10,8 +10,8 @@ export class Etiqueta {
 	@Column({ name: 'nombre_etiqueta', type: 'varchar', length: 255 })
 	nombreEtiqueta!: string;
 
-	@Column({ type: 'varchar', length: 255 })
-	icono!: string;
+	@Column({ name: 'url_icono', type: 'varchar', length: 255 })
+	url_icono!: string;
 
 	@ManyToMany(() => Publicacion, (publicacion) => publicacion.etiquetas)
 	publicaciones!: PublicacionType[];
