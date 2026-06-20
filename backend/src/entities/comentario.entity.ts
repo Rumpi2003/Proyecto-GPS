@@ -1,21 +1,22 @@
-import { pgTable, serial, integer, varchar, foreignKey } from 'drizzle-orm/pg-core';
-import { usuario } from './usuario.entity.js';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Usuario } from './usuario.entity.js';
+import { Publicacion } from './publicacion.entity.js';
+import type { Usuario as UsuarioType } from './usuario.entity.js';
+import type { Publicacion as PublicacionType } from './publicacion.entity.js';
 
-export const comentario = pgTable(
-  'comentario',
-  {
-    id_comentario: serial('id_comentario').primaryKey(),
-    id_usuario: integer('id_usuario').notNull(),
-    id_publicacion: integer('id_publicacion').notNull(),
-    texto: varchar('texto', { length: 1000 }).notNull(),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.id_usuario],
-      foreignColumns: [usuario.id_usuario],
-    }),
-  ]
-);
+@Entity({ name: 'comentario' })
+export class Comentario {
+	@PrimaryGeneratedColumn({ name: 'id_comentario', type: 'int' })
+	id_comentario!: number;
 
-export type Comentario = typeof comentario.$inferSelect;
-export type NewComentario = typeof comentario.$inferInsert;
+	@ManyToOne(() => Usuario, (usuario) => usuario.comentarios, { nullable: false, onDelete: 'CASCADE' })
+	@JoinColumn({ name: 'id_usuario' })
+	usuario!: UsuarioType;
+
+	@ManyToOne(() => Publicacion, (publicacion) => publicacion.comentarios, { nullable: false, onDelete: 'CASCADE' })
+	@JoinColumn({ name: 'id_publicacion' })
+	publicacion!: PublicacionType;
+
+	@Column({ type: 'varchar', length: 255 })
+	texto!: string;
+}

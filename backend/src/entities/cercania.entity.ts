@@ -1,11 +1,22 @@
-import { pgTable, serial, integer } from 'drizzle-orm/pg-core';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Publicacion } from './publicacion.entity.js';
+import { Universidad } from './universidad.entity.js';
+import type { Publicacion as PublicacionType } from './publicacion.entity.js';
+import type { Universidad as UniversidadType } from './universidad.entity.js';
 
-export const cercania = pgTable('cercania', {
-  id_cercania: serial('id_cercania').primaryKey(),
-  id_publicacion: integer('id_publicacion').notNull(),
-  id_universidad: integer('id_universidad').notNull(),
-  distancia: integer('distancia').notNull(),
-});
+@Entity({ name: 'cercania' })
+export class Cercania {
+	@PrimaryGeneratedColumn({ name: 'id_cercania', type: 'int' })
+	id_cercania!: number;
 
-export type Cercania = typeof cercania.$inferSelect;
-export type NewCercania = typeof cercania.$inferInsert;
+	@ManyToOne(() => Publicacion, (publicacion) => publicacion.cercanias, { nullable: false, onDelete: 'CASCADE' })
+	@JoinColumn({ name: 'id_publicacion' })
+	publicacion!: PublicacionType;
+
+	@ManyToOne(() => Universidad, (universidad) => universidad.cercanias, { nullable: false, onDelete: 'CASCADE' })
+	@JoinColumn({ name: 'id_universidad' })
+	universidad!: UniversidadType;
+
+	@Column({ type: 'int' })
+	distancia!: number;
+}

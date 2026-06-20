@@ -1,14 +1,29 @@
-import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Cercania } from './cercania.entity.js';
 
-export const universidad = pgTable('universidad', {
-  id_universidad: serial('id_universidad').primaryKey(),
-  nombre: varchar('nombre', { length: 255 }).notNull(),
-  ciudad_comuna: varchar('ciudad_comuna', { length: 100 }).notNull(),
-  calle: varchar('calle', { length: 255 }).notNull(),
-  numero: varchar('numero', { length: 20 }).notNull(),
-  latitud: varchar('latitud', { length: 50 }).notNull(),
-  longitud: varchar('longitud', { length: 50 }).notNull(),
-});
+@Entity({ name: 'universidad' })
+export class Universidad {
+	@PrimaryGeneratedColumn({ name: 'id_universidad', type: 'int' })
+	id_universidad!: number;
 
-export type Universidad = typeof universidad.$inferSelect;
-export type NewUniversidad = typeof universidad.$inferInsert;
+	@Column({ type: 'varchar', length: 255 })
+	nombre!: string;
+
+	@Column({ name: 'ciudad_comuna', type: 'varchar', length: 255 })
+	ciudadComuna!: string;
+
+	@Column({ type: 'varchar', length: 255 })
+	calle!: string;
+
+	@Column({ type: 'varchar', length: 50 })
+	numero!: string;
+
+	@Column({ type: 'varchar', length: 255 })
+	latitud!: string;
+
+	@Column({ type: 'varchar', length: 255 })
+	longitud!: string;
+
+	@OneToMany(() => Cercania, (cercania) => cercania.universidad)
+	cercanias!: Cercania[];
+}

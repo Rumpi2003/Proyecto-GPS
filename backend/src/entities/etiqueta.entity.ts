@@ -1,10 +1,18 @@
-import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { Publicacion } from './publicacion.entity.js';
+import type { Publicacion as PublicacionType } from './publicacion.entity.js';
 
-export const etiqueta = pgTable('etiqueta', {
-  id_etiqueta: serial('id_etiqueta').primaryKey(),
-  nombre_etiqueta: varchar('nombre_etiqueta', { length: 100 }).notNull(),
-  icono: varchar('icono', { length: 255 }).notNull(),
-});
+@Entity({ name: 'etiqueta' })
+export class Etiqueta {
+	@PrimaryGeneratedColumn({ name: 'id_etiqueta', type: 'int' })
+	id_etiqueta!: number;
 
-export type Etiqueta = typeof etiqueta.$inferSelect;
-export type NewEtiqueta = typeof etiqueta.$inferInsert;
+	@Column({ name: 'nombre_etiqueta', type: 'varchar', length: 255 })
+	nombreEtiqueta!: string;
+
+	@Column({ type: 'varchar', length: 255 })
+	icono!: string;
+
+	@ManyToMany(() => Publicacion, (publicacion) => publicacion.etiquetas)
+	publicaciones!: PublicacionType[];
+}
