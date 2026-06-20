@@ -2,7 +2,6 @@ FROM node:20-alpine AS base
 WORKDIR /app
 
 COPY package.json package-lock.json* tsconfig.json ./
-COPY src/config/drizzle.config.ts ./
 COPY src ./src
 
 RUN npm install
@@ -15,7 +14,6 @@ COPY --from=base /app/package.json ./
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/dist ./dist
 COPY --from=base /app/src ./src
-COPY --from=base /app/src/config/drizzle.config.ts ./drizzle.config.ts
 
 ENV NODE_ENV=production
 EXPOSE 5000
