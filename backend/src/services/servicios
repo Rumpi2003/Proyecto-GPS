@@ -1,0 +1,4 @@
+# En esta carpeta deben ir los CRUDS a la base de datos.
+# Deben ser Querys que tengan sentido con las reglas de negocio.
+# Por ejemplo: Obtener los datos de una universidad segun su nombre
+# o obtener todos los comentarios de una publicacion.

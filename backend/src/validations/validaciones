@@ -1,0 +1,3 @@
+# En esta carpeta van las validaciones base.
+# Validan cosas como los formatos de los datos
+# antes de ingresarlos a la base de datos.
