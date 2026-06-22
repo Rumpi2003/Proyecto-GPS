@@ -1,7 +1,11 @@
 import { AppDataSource } from "../config/db.config.js";
 import { Publicacion, Estado } from "../entities/publicacion.entity.js"
+import { Cercania } from "../entities/cercania.entity.js"
+import { Foto } from "../entities/foto.entity.js"
 
 const publicacionRepository = AppDataSource.getRepository(Publicacion);
+const cercaniaRepository = AppDataSource.getRepository(Cercania);
+const fotoRepository = AppDataSource.getRepository(Foto);
 
 type PublicacionFiltros = {
     id_universidad: number;
@@ -12,6 +16,8 @@ type PublicacionFiltros = {
 }
 
 export class PublicacionService {
+    // CRUDs para manejar las publicaciones
+    
     private repository = publicacionRepository;
 
     async create(data: Partial<Publicacion>) {
@@ -109,5 +115,38 @@ export class PublicacionService {
         const publicacion = await this.repository.findOneBy({ id_publicacion });
         if (!publicacion) throw new Error('Publicacion no encontrada');
         return this.repository.remove(publicacion);
+    }
+
+    // Método para crear la cercanía una vez se valída la distancia mínima con universidad
+    // debería de ser llamado desde la funcion para crear una publicación en el controlador
+    async createCercania(id_publicacion: number, id_universidad: number, distancia_metros: number) {
+        const cercania = cercaniaRepository.create({
+            id_publicacion,
+            id_universidad,
+            distancia_metros,
+        });
+
+        return cercaniaRepository.save(cercania);
+    }
+
+    // Métodos para añadir y eliminar fotos de una publicación, estos se usan para que el usuario 
+    // publicador pueda manejar las fotos de sus publicaciones.
+    async addFoto(id_publicacion: number, url_foto: string, es_portada = false) {
+        const publicacion = await this.repository.findOneBy({ id_publicacion });
+        if (!publicacion) throw new Error('Publicación no encontrada');
+
+        const foto = fotoRepository.create({
+            publicacion,
+            url_foto,
+            es_portada
+        });
+
+        return fotoRepository.save(foto);
+    }
+
+    async removeFoto(id_foto: number) {
+        const foto = await fotoRepository.findOneBy({ id_foto });
+        if (!foto) throw new Error('Foto no encontrada');
+        return fotoRepository.remove(foto);
     }
 }
