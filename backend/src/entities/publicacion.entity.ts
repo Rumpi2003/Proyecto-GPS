@@ -17,6 +17,7 @@ import type { Foto as FotoType } from './foto.entity.js';
 export enum Estado {
   ACTIVA = 'activa',
   INACTIVA = 'inactiva',
+  ELIMINADA = 'eliminada'
 }
 
 @Entity({ name: 'publicacion' })
