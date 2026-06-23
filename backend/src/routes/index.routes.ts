@@ -1,4 +1,7 @@
 import { Router, type Application, type Request, type Response } from 'express';
+//imports de usuario y autenticacion
+import usuarioRoutes from './usuario.routes.js';
+import authRoutes from './auth.routes.js';
 import { geocodingService } from '../services/geocoding.service.js';
 
 export default function routerApi(app: Application) {
@@ -28,4 +31,7 @@ export default function routerApi(app: Application) {
     });
 
     app.use('/api', router);
+    // Rutas de usuario y autenticación
+    app.use('/api', usuarioRoutes)
+    app.use('/api', authRoutes);
 }
