@@ -10,19 +10,19 @@ export const crearReporte = async (
   motivo: Motivo,
   detalle?: string,
 ): Promise<ReporteType> => {
-  const reporte = AppDataSource.getRepository(Reporte);
-  const usuarioReporte = AppDataSource.getRepository(Usuario);
-  const publicacionReporte = AppDataSource.getRepository(Publicacion);
+  const repo = AppDataSource.getRepository(Reporte);
+  const usuarioRepo = AppDataSource.getRepository(Usuario);
+  const publicacionRepo = AppDataSource.getRepository(Publicacion);
 
 
   // Verificar si el usuario y la publicación existen (no se si esto se middleware a futuro, o en validations)
-  const usuario = await usuarioReporte.findOneBy({ id_usuario });
+  const usuario = await usuarioRepo.findOneBy({ id_usuario });
   if (!usuario) throw new Error('Usuario no encontrado');
 
-  const publicacion = await publicacionReporte.findOneBy({ id_publicacion });
+  const publicacion = await publicacionRepo.findOneBy({ id_publicacion });
   if (!publicacion) throw new Error('Publicación no encontrada');
 
-  const nuevo = reporte.create({
+  const nuevo = repo.create({
     usuario,
     publicacion,
     motivo,
@@ -30,12 +30,12 @@ export const crearReporte = async (
     estado: Estado.PENDIENTE,
   } as unknown as ReporteType);
 
-  return await reporte.save(nuevo);
+  return await repo.save(nuevo);
 };
 
 export const obtenerPorPublicacion = async (id_publicacion: number): Promise<ReporteType[]> => {
-  const reporte = AppDataSource.getRepository(Reporte);
-  return await reporte.find({
+  const repo = AppDataSource.getRepository(Reporte);
+  return await repo.find({
     where: { publicacion: { id_publicacion } as any },
     relations: ['usuario', 'publicacion'],
     order: { fecha_reporte: 'DESC' },
@@ -43,8 +43,8 @@ export const obtenerPorPublicacion = async (id_publicacion: number): Promise<Rep
 };
 
 export const obtenerPorUsuario = async (id_usuario: number): Promise<ReporteType[]> => {
-  const reporte = AppDataSource.getRepository(Reporte);
-  return await reporte.find({
+  const repo = AppDataSource.getRepository(Reporte);
+  return await repo.find({
     where: { usuario: { id_usuario } as any },
     relations: ['usuario', 'publicacion'],
     order: { fecha_reporte: 'DESC' },
