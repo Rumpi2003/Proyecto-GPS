@@ -1,7 +1,7 @@
 import { type Request, type Response } from 'express';
 import Joi from 'joi';
 import * as usuarioService from '../services/usuario.service.js';
-import { hashPassword, comparePassword, generateToken } from '../services/auth.service.js';
+import { encriptarContraseña, compararContraseña, generarToken } from '../services/auth.service.js';
 import { sendSuccess, sendError } from '../handlers/usuario.handler.js';
 import { Rol } from '../entities/usuario.entity.js';
 
@@ -16,7 +16,7 @@ const loginSchema = Joi.object({
   contraseña: Joi.string().required(),
 });
 
-export async function register(req: Request, res: Response): Promise<void> {
+export async function registrarUsuario(req: Request, res: Response): Promise<void> {
   try {
     const { error, value } = registerSchema.validate(req.body, { abortEarly: false });
     if (error) {
@@ -24,28 +24,28 @@ export async function register(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const existente = await usuarioService.findByCorreo(value.correo);
+    const existente = await usuarioService.obtenerPorCorreo(value.correo);
     if (existente) {
       sendError(res, 'El correo ya está registrado', 409);
       return;
     }
 
-    const hashed = await hashPassword(value.contraseña);
-    const usuario = await usuarioService.create({
+    const hashed = await encriptarContraseña(value.contraseña);
+    const usuario = await usuarioService.crear({
       correo: value.correo,
       contraseña: hashed,
       nombre: value.nombre,
       rol: Rol.REGISTRADO,
     });
 
-    const token = generateToken({ id: usuario.id_usuario, rol: usuario.rol });
+    const token = generarToken({ id: usuario.id_usuario, rol: usuario.rol });
     sendSuccess(res, { usuario, token }, 'Registro exitoso', 201);
   } catch {
     sendError(res, 'Error al registrar usuario');
   }
 }
 
-export async function login(req: Request, res: Response): Promise<void> {
+export async function iniciarSesion(req: Request, res: Response): Promise<void> {
   try {
     const { error, value } = loginSchema.validate(req.body, { abortEarly: false });
     if (error) {
@@ -53,19 +53,19 @@ export async function login(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const usuario = await usuarioService.findByCorreo(value.correo);
+    const usuario = await usuarioService.obtenerPorCorreo(value.correo);
     if (!usuario) {
       sendError(res, 'Credenciales inválidas', 401);
       return;
     }
 
-    const valida = await comparePassword(value.contraseña, usuario.contraseña);
+    const valida = await compararContraseña(value.contraseña, usuario.contraseña);
     if (!valida) {
       sendError(res, 'Credenciales inválidas', 401);
       return;
     }
 
-    const token = generateToken({ id: usuario.id_usuario, rol: usuario.rol });
+    const token = generarToken({ id: usuario.id_usuario, rol: usuario.rol });
     sendSuccess(res, { usuario, token }, 'Inicio de sesión exitoso');
   } catch {
     sendError(res, 'Error al iniciar sesión');
@@ -74,23 +74,23 @@ export async function login(req: Request, res: Response): Promise<void> {
 
 //==========================================
 //usuario admin inicial
-export async function setupAdmin(req: Request, res: Response): Promise<void> {
+export async function crearAdminInicial(req: Request, res: Response): Promise<void> {
   try {
-    const existente = await usuarioService.findByCorreo('admin@gmail.com');
+    const existente = await usuarioService.obtenerPorCorreo('admin@gmail.com');
     if (existente) {
       sendError(res, 'El admin ya existe', 409);
       return;
     }
 
-    const hashed = await hashPassword('admin123');
-    const usuario = await usuarioService.create({
+    const hashed = await encriptarContraseña('admin123');
+    const usuario = await usuarioService.crear({
       correo: 'admin@gmail.com',
       contraseña: hashed,
       nombre: 'admin',
       rol: Rol.ADMINISTRADOR,
     });
 
-    const token = generateToken({ id: usuario.id_usuario, rol: usuario.rol });
+    const token = generarToken({ id: usuario.id_usuario, rol: usuario.rol });
     sendSuccess(res, { usuario, token }, 'Admin creado exitosamente', 201);
   } catch {
     sendError(res, 'Error al crear admin');

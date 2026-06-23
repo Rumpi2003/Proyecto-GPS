@@ -6,14 +6,14 @@ if (!JWT_SECRET) {
   throw new Error('JWT_SECRET no está definida en las variables de entorno');
 }
 
-export function hashPassword(password: string): Promise<string> {
+export function encriptarContraseña(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
 }
 
-export function comparePassword(password: string, hash: string): Promise<boolean> {
+export function compararContraseña(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
 
-export function generateToken(payload: { id: number; rol: string }): string {
+export function generarToken(payload: { id: number; rol: string }): string {
   return jwt.sign(payload, JWT_SECRET!, { expiresIn: '24h' });
 }

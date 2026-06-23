@@ -6,16 +6,16 @@ import {
   updateUsuarioSchema,
 } from '../validations/usuario.validation.js';
 
-export async function getAll(req: Request, res: Response): Promise<void> {
+export async function obtenerUsuarios(req: Request, res: Response): Promise<void> {
   try {
-    const usuarios = await usuarioService.findAll();
+    const usuarios = await usuarioService.obtenerTodos();
     sendSuccess(res, usuarios, 'Usuarios obtenidos correctamente');
   } catch (error) {
     sendError(res, 'Error al obtener usuarios');
   }
 }
 
-export async function getById(req: Request, res: Response): Promise<void> {
+export async function obtenerUsuario(req: Request, res: Response): Promise<void> {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
@@ -23,7 +23,7 @@ export async function getById(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const usuario = await usuarioService.findById(id);
+    const usuario = await usuarioService.obtenerPorId(id);
     if (!usuario) {
       sendError(res, 'Usuario no encontrado', 404);
       return;
@@ -35,7 +35,7 @@ export async function getById(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function create(req: Request, res: Response): Promise<void> {
+export async function crearUsuario(req: Request, res: Response): Promise<void> {
   try {
     const { error, value } = createUsuarioSchema.validate(req.body, { abortEarly: false });
     if (error) {
@@ -43,14 +43,14 @@ export async function create(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const usuario = await usuarioService.create(value);
+    const usuario = await usuarioService.crear(value);
     sendSuccess(res, usuario, 'Usuario creado correctamente', 201);
   } catch (error) {
     sendError(res, 'Error al crear usuario');
   }
 }
 
-export async function update(req: Request, res: Response): Promise<void> {
+export async function actualizarUsuario(req: Request, res: Response): Promise<void> {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
@@ -64,7 +64,7 @@ export async function update(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const usuario = await usuarioService.update(id, value);
+    const usuario = await usuarioService.actualizar(id, value);
     if (!usuario) {
       sendError(res, 'Usuario no encontrado', 404);
       return;
@@ -76,7 +76,7 @@ export async function update(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function remove(req: Request, res: Response): Promise<void> {
+export async function eliminarUsuario(req: Request, res: Response): Promise<void> {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
@@ -84,7 +84,7 @@ export async function remove(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const deleted = await usuarioService.remove(id);
+    const deleted = await usuarioService.eliminar(id);
     if (!deleted) {
       sendError(res, 'Usuario no encontrado', 404);
       return;
