@@ -12,7 +12,7 @@ export class EtiquetaService {
     // Método para obtener todas las etiquetas que existen, sirve para mostrarlas en el dashboard
     // principal cuando el usuario quiere aplicar filtros.
     async findAllEtiquetas() {
-    return await this.repository.find();
+        return await this.repository.find();
     }
 
     // Métodos para añadir y eliminar etiquetas de una publicación, sirve para que el usuario publicador
