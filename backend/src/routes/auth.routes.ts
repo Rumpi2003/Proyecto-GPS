@@ -3,9 +3,9 @@ import { registrarUsuario, iniciarSesion, crearAdminInicial } from '../controlle
 
 const router = Router();
 
-router.post('/auth/register', registrarUsuario);
-router.post('/auth/login', iniciarSesion);
+router.post('/register', registrarUsuario);
+router.post('/login', iniciarSesion);
 //admin inicial
-router.post('/auth/setup-admin', crearAdminInicial);
+router.post('/setup-admin', crearAdminInicial);
 
 export default router;
