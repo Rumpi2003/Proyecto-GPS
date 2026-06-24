@@ -1,6 +1,6 @@
 import { type Request, type Response } from 'express';
 import * as usuarioService from '../services/usuario.service.js';
-import { sendSuccess, sendError } from '../handlers/usuario.handler.js';
+import { sendSuccess, sendError } from '../handlers/responseHandlers.js';
 import {
   createUsuarioSchema,
   updateUsuarioSchema,

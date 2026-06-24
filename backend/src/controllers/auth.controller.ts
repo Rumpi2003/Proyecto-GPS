@@ -2,7 +2,7 @@ import { type Request, type Response } from 'express';
 import Joi from 'joi';
 import * as usuarioService from '../services/usuario.service.js';
 import { encriptarContraseña, compararContraseña, generarToken } from '../services/auth.service.js';
-import { sendSuccess, sendError } from '../handlers/usuario.handler.js';
+import { sendSuccess, sendError } from '../handlers/responseHandlers.js';
 import { Rol } from '../entities/usuario.entity.js';
 
 const registerSchema = Joi.object({

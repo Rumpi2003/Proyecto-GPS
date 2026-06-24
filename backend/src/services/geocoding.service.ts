@@ -5,6 +5,11 @@ dotenv.config();
 
 const GOOGLE_GEOCODE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
 
+// Formato de la dirección es: [calle] [numero], [comuna], [región], [pais]
+// Dado que el alcance del proyecto solo se extiende a universidades de concepción
+// el [país] y la [region] siempre serán Chile y Bio Bio, por lo que el usuario
+// solo tendrá que ingresar la  [comuna], [calle] y [numero]
+
 export class GeocodingService {
     async geocodeAddress(direccion: string) {
         const apiKey = process.env.GOOGLE_GEOCODE_API_KEY;
