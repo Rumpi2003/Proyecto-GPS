@@ -4,9 +4,11 @@ import { Universidad } from "../entities/universidad.entity.js";
 
 const universidadRepo = AppDataSource.getRepository(Universidad);
 
-export async function distanciaMinima(direccion: string) {
+export async function distanciaMinima(placeId: string) {
     const maxDistance = 3000
-    const { lat, lng } = await geocodingService.geocodeAddress(direccion);
+
+    const { lat, lng, formattedAddress, coordenadas } = await geocodingService.geocodePlaceId(placeId);
+
     const point = `SRID=4326;POINT(${lng} ${lat})`;
 
     const { entities, raw } = await universidadRepo
@@ -25,5 +27,7 @@ export async function distanciaMinima(direccion: string) {
     return entities.map((uni, index) => ({
         universidad: uni,
         distancia_metros: Number(raw[index].distancia_metros),
+        direccion: formattedAddress,
+        coordenadas,
     }));
 }

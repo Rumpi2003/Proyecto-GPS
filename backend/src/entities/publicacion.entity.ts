@@ -50,17 +50,11 @@ export class Publicacion {
 	@Column({ type: 'enum', enum: Estado, default: Estado.ACTIVA })
 	estado!: Estado;
 
-	@Column({ name: 'comuna', type: 'varchar', length: 255 })
-	comuna!: string;
-
 	@Column({ type: 'varchar', length: 255 })
-	calle!: string;
-
-	@Column({ type: 'int' })
-	numero!: number;
+	direccion!: string;
 
 	@Column({ type: 'geography', spatialFeatureType: 'Point', srid: 4326 })
-	coordenadas!: string;
+	coordenadas!: object;
 
 	@Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
 	fecha_publicacion!: Date;

@@ -11,13 +11,14 @@ const GOOGLE_GEOCODE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
 // solo tendrá que ingresar la  [comuna], [calle] y [numero]
 
 export class GeocodingService {
-    async geocodeAddress(direccion: string) {
+    async geocodePlaceId(placeId: string) {
         const apiKey = process.env.GOOGLE_GEOCODE_API_KEY;
         if (!apiKey) {
             throw new Error('Falta GOOGLE_MAPS_API_KEY en las variables de entorno');
         }
 
-        const url = `${GOOGLE_GEOCODE_URL}?address=${encodeURIComponent(direccion)}&key=${apiKey}`;
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?place_id=${encodeURIComponent(placeId)}&key=${apiKey}`;
+
         const resultado = await axios.get(url);
 
         if (resultado.status !== 200) {
@@ -26,17 +27,22 @@ export class GeocodingService {
 
         const data = resultado.data;
 
-        if (data.status !== 'OK') {
-            throw new Error(data.error_message || data.status);
-        } else if (!data.results?.length) {
-            throw new Error(`No se encontraron coordenadas para la dirección: ${direccion}`);
+        if (data.status !== 'OK' || !data.results?.length) {
+            throw new Error(`No se encontró el place_id: ${placeId}`);
         }
 
+        const ubicacion = data.results[0];
+
         return {
-            lat: data.results[0].geometry.location.lat,
-            lng: data.results[0].geometry.location.lng,
-            formattedAddress: data.results[0].formatted_address,
-        }
+            placeId,
+            formattedAddress: ubicacion.formatted_address,
+            lat: ubicacion.geometry.location.lat,
+            lng: ubicacion.geometry.location.lng,
+            coordenadas: {
+                type: 'Point',
+                coordinates: [ubicacion.geometry.location.lng, ubicacion.geometry.location.lat],
+            },
+        };
     }
 }
 

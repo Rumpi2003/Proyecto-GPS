@@ -10,17 +10,11 @@ export class Universidad {
 	@Column({ type: 'varchar', length: 255 })
 	nombre_universidad!: string;
 
-	@Column({ name: 'comuna', type: 'varchar', length: 255 })
-	comuna!: string;
-
 	@Column({ type: 'varchar', length: 255 })
-	calle!: string;
-
-	@Column({ type: 'varchar', length: 50 })
-	numero!: string;
+	direccion!: string;
 
 	@Column({ type: 'geography', spatialFeatureType: 'Point', srid: 4326 })
-	coordenadas!: string;
+	coordenadas!: object;
 
 	@OneToMany(() => Cercania, (cercania) => cercania.universidad)
 	cercanias!: CercaniaType[];
