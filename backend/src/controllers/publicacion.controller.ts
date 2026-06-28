@@ -6,13 +6,30 @@ import { direccionExiste } from "../middleware/direccionExistente.middleware.js"
 import { Usuario } from "../entities/usuario.entity.js";
 import { EtiquetaService } from "../services/etiqueta.service.js";
 import { type Publicacion } from "../entities/publicacion.entity.js";
+import {
+    createPublicacionSchema,
+    updatePublicacionSchema,
+    idPublicacionParamSchema,
+    idUsuarioParamSchema,
+    filtrosPublicacionSchema,
+} from '../validations/publicacion.validation.js';
 
 const publicacionService = new PublicacionService();
 const etiquetaService = new EtiquetaService();
 
 export async function crearPublicacion(req: Request, res: Response): Promise<void> {
     try {
-        const { place_id, titulo, descripcion, precio, telefono, permitir_comentarios, url_fotos = [], url_portada, etiquetas = [] } = req.body;
+        const { error, value } = createPublicacionSchema.validate(req.body, {
+            abortEarly: false,
+            stripUnknown: true
+        });
+
+        if (error) {
+            sendError(res, error.details.map((d) => d.message).join(', '), 400);
+            return;
+        }
+
+        const { place_id, titulo, descripcion, precio, telefono, permitir_comentarios, url_fotos = [], url_portada, etiquetas = [] } = value;
 
         // Validar que este dentro del rango de 3000m de una universidad
         const resultados = await distanciaMinima(place_id);
@@ -92,7 +109,28 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
 
 export async function actualizarPublicacion(req: Request, res: Response): Promise<void> {
     try {
-        const { id_publicacion } = req.params;
+        const { error: paramsError, value: paramsValue } =idPublicacionParamSchema.validate(req.params, {
+            abortEarly: false,
+            stripUnknown: true
+        });
+
+        const { error: bodyError, value: bodyValue } = updatePublicacionSchema.validate(req.body, {
+            abortEarly: false,
+            stripUnknown: true
+        });
+
+        if (paramsError) {
+            sendError(res, paramsError.details.map((d) => d.message).join(', '), 400);
+            return;
+        }
+
+        if (bodyError) {
+            sendError(res, bodyError.details.map((d) => d.message).join(', '), 400);
+            return;
+        }
+
+        const { id_publicacion } = paramsValue;
+
         const {
             titulo,
             descripcion,
@@ -104,7 +142,7 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
             nuevas_fotos = [],
             eliminar_etiquetas = [],
             nuevas_etiquetas = [],
-        } = req.body;
+        } = bodyValue;
 
         const id = Number(id_publicacion);
 
@@ -172,7 +210,16 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
 
 export async function eliminarPublicacion(req: Request, res: Response): Promise<void> {
     try {
-        const id = Number(req.params.id_publicacion);
+        const { error, value } = idPublicacionParamSchema.validate(req.params, {
+            abortEarly: false,
+            stripUnknown: true
+        });
+
+        if (error) {
+            sendError(res, error.details.map((d) => d.message).join(', '), 400);
+            return;
+        }
+        const id = Number(value.id_publicacion);
 
         if(Number.isNaN(id)) {
             sendError(res, 'id_publicación inválido', 400);
@@ -188,13 +235,23 @@ export async function eliminarPublicacion(req: Request, res: Response): Promise<
 
 export async function obtenerPublicacionesPorFiltros(req: Request, res: Response): Promise<void> {
     try {
+        const { error, value } = filtrosPublicacionSchema.validate(req.query, {
+            abortEarly: false,
+            stripUnknown: true
+        });
+
+        if (error) {
+            sendError(res, error.details.map((d) => d.message).join(', '), 400);
+            return;
+        }
+
         const {
             id_universidad,
             distancia_max,
             precio_max,
             valoracion_min,
             ids_etiquetas,
-        } = req.query;
+        } = value;
 
         if (!id_universidad) {
             sendError(res, 'id_universidad es requerido', 400);
@@ -244,12 +301,17 @@ export async function obtenerPublicacionesPorFiltros(req: Request, res: Response
 
 export async function obtenerPublicacionesUsuario(req: Request, res: Response): Promise<void> {
     try {
-        const id_usuario = Number(req.params.id_usuario);
+        const { error, value } = idUsuarioParamSchema.validate(req.params, {
+            abortEarly: false,
+            stripUnknown: true
+        });
 
-        if (Number.isNaN(id_usuario)) {
-            sendError(res, 'id_usuario inválido', 400);
+        if (error) {
+            sendError(res, error.details.map((d) => d.message).join(', '), 400);
             return;
         }
+
+        const id_usuario = Number(value.id_usuario);
 
         const publicaciones = await publicacionService.findByPublicante(id_usuario);
         sendSuccess(res, publicaciones, 'Publicaciones del usuario obtenidas', 200);
@@ -260,12 +322,17 @@ export async function obtenerPublicacionesUsuario(req: Request, res: Response): 
 
 export async function obtenerPublicacionesActivasUsuario(req: Request, res: Response): Promise<void> {
     try {
-        const id_usuario = Number(req.params.id_usuario);
+        const { error, value } = idUsuarioParamSchema.validate(req.params, {
+            abortEarly: false,
+            stripUnknown: true
+        });
 
-        if (Number.isNaN(id_usuario)) {
-            sendError(res, 'id_usuario inválido', 400);
+        if (error) {
+            sendError(res, error.details.map((d) => d.message).join(', '), 400);
             return;
         }
+
+        const id_usuario = Number(value.id_usuario);
 
         const publicaciones = await publicacionService.findByPublicanteActivas(id_usuario);
         sendSuccess(res, publicaciones, 'Publicaciones activas del usuario obtenidas', 200);
@@ -276,12 +343,17 @@ export async function obtenerPublicacionesActivasUsuario(req: Request, res: Resp
 
 export async function obtenerPublicacionesInactivasUsuario(req: Request, res: Response): Promise<void> {
     try {
-        const id_usuario = Number(req.params.id_usuario);
+        const { error, value } = idUsuarioParamSchema.validate(req.params, {
+            abortEarly: false,
+            stripUnknown: true
+        });
 
-        if (Number.isNaN(id_usuario)) {
-            sendError(res, 'id_usuario inválido', 400);
+        if (error) {
+            sendError(res, error.details.map((d) => d.message).join(', '), 400);
             return;
         }
+
+        const id_usuario = Number(value.id_usuario);
 
         const publicaciones = await publicacionService.findByPublicanteInactivas(id_usuario);
         sendSuccess(res, publicaciones, 'Publicaciones inactivas del usuario obtenidas', 200);
