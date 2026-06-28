@@ -12,10 +12,10 @@ import { esAdmin } from '../middleware/esAdmin.js';
 
 const router = Router();
 
-router.get('/usuarios', authenticate, esAdmin, obtenerUsuarios);
-router.get('/usuarios/:id', authenticate, esAdmin, obtenerUsuario);
-router.post('/usuarios', authenticate, esAdmin, crearUsuario);
-router.put('/usuarios/:id', authenticate, esAdmin, actualizarUsuario);
-router.delete('/usuarios/:id', authenticate, esAdmin, eliminarUsuario);
+router.get('/', authenticate, esAdmin, obtenerUsuarios);
+router.get('/:id', authenticate, esAdmin, obtenerUsuario);
+router.post('/', authenticate, esAdmin, crearUsuario);
+router.put('/:id', authenticate, esAdmin, actualizarUsuario);
+router.delete('/:id', authenticate, esAdmin, eliminarUsuario);
 
 export default router;

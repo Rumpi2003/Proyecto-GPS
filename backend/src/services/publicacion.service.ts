@@ -73,6 +73,13 @@ export class PublicacionService {
         return consulta.getMany();
     }
 
+    async findOne(id_publicacion: number) {
+        return this.repository.findOne({
+             where: { id_publicacion },
+            relations: ['publicante', 'etiquetas', 'fotos'],
+        });
+    }
+
     async findByPublicante(id_publicante: number) {
         return this.repository.find({
             where: { publicante: { id_usuario: id_publicante} },
