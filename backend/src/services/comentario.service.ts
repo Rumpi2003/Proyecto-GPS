@@ -1,55 +1,45 @@
 import { AppDataSource } from '../config/db.config.js';
 import { Comentario } from '../entities/comentario.entity.js';
-import { Usuario } from '../entities/usuario.entity.js';
 import { Publicacion } from '../entities/publicacion.entity.js';
-import type { Comentario as ComentarioType } from '../entities/comentario.entity.js';
 
-export const crearComentario = async (
-  id_usuario: number,
-  id_publicacion: number,
-  texto: string,
-): Promise<ComentarioType> => {
-  const repo = AppDataSource.getRepository(Comentario);
-  const usuarioRepo = AppDataSource.getRepository(Usuario);
-  const publicacionRepo = AppDataSource.getRepository(Publicacion);
+export class ComentarioService {
+  private comentarioRepo = AppDataSource.getRepository(Comentario);
+  private publicacionRepo = AppDataSource.getRepository(Publicacion);
 
-  const usuario = await usuarioRepo.findOneBy({ id_usuario });
-  if (!usuario) throw new Error('Usuario no encontrado');
+  async crear(id_usuario: number, data: { id_publicacion: number; texto: string }) {
+    // 1. Verificar si la publicación existe
+    const publicacion = await this.publicacionRepo.findOneBy({ id_publicacion: data.id_publicacion });
+    if (!publicacion) {
+      throw new Error('NOT_FOUND: La publicación no existe');
+    }
 
-  const publicacion = await publicacionRepo.findOneBy({ id_publicacion });
-  if (!publicacion) throw new Error('Publicación no encontrada');
+    // 2. Regla de Negocio (RF_9): Verificar si los comentarios están habilitados
+    // Se asume que existe la propiedad 'permitir_comentarios' en la entidad Publicacion
+    if (publicacion.permitir_comentarios === false) {
+      throw new Error('BAD_REQUEST: Esta publicación tiene los comentarios deshabilitados');
+    }
 
-  const nuevo = repo.create({
-    id_usuario,
-    id_publicacion,
-    usuario,
-    publicacion,
-    texto,
-  } as unknown as ComentarioType);
+    // 3. Crear el comentario
+    const nuevoComentario = this.comentarioRepo.create({
+      id_usuario,
+      id_publicacion: data.id_publicacion,
+      texto: data.texto,
+    });
 
-  return await repo.save(nuevo);
-};
+    return await this.comentarioRepo.save(nuevoComentario);
+  }
 
-export const obtenerPorPublicacion = async (id_publicacion: number): Promise<ComentarioType[]> => {
-  const repo = AppDataSource.getRepository(Comentario);
-  return await repo.find({
-    where: { publicacion: { id_publicacion } as any },
-    relations: ['usuario', 'publicacion'],
-    order: { fecha_comentario: 'DESC' },
-  });
-};
+  async obtenerPorPublicacion(id_publicacion: number) {
+    // Verificar si la publicación existe antes de buscar comentarios
+    const publicacion = await this.publicacionRepo.findOneBy({ id_publicacion });
+    if (!publicacion) {
+      throw new Error('NOT_FOUND: La publicación no existe');
+    }
 
-export const obtenerPorUsuario = async (id_usuario: number): Promise<ComentarioType[]> => {
-  const repo = AppDataSource.getRepository(Comentario);
-  return await repo.find({
-    where: { usuario: { id_usuario } as any },
-    relations: ['usuario', 'publicacion'],
-    order: { fecha_comentario: 'DESC' },
-  });
-};
-
-export default {
-  crearComentario,
-  obtenerPorPublicacion,
-  obtenerPorUsuario,
-};
+    return await this.comentarioRepo.find({
+      where: { id_publicacion },
+      relations: ['usuario'], // Retornar los datos del usuario que comentó
+      order: { fecha_comentario: 'DESC' }, // Los más recientes primero
+    });
+  }
+}
