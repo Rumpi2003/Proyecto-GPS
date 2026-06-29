@@ -1,76 +1,47 @@
 import { AppDataSource } from '../config/db.config.js';
 import { Valoracion } from '../entities/valoracion.entity.js';
-import { Usuario } from '../entities/usuario.entity.js';
 import { Publicacion } from '../entities/publicacion.entity.js';
-import type { Valoracion as ValoracionType } from '../entities/valoracion.entity.js';
 
-export const crearValoracion = async (
-  id_usuario: number,
-  id_publicacion: number,
-  puntuacion: number,
-): Promise<ValoracionType> => {
-  const repo = AppDataSource.getRepository(Valoracion);
-  const usuarioRepo = AppDataSource.getRepository(Usuario);
-  const publicacionRepo = AppDataSource.getRepository(Publicacion);
+export class ValoracionService {
+  private valoracionRepo = AppDataSource.getRepository(Valoracion);
+  private publicacionRepo = AppDataSource.getRepository(Publicacion);
 
-  const usuario = await usuarioRepo.findOneBy({ id_usuario });
-  if (!usuario) throw new Error('Usuario no encontrado');
+  async crear(id_usuario: number, data: { id_publicacion: number; puntuacion: number }) {
+    // 1. Verificar si la publicación existe
+    const publicacion = await this.publicacionRepo.findOneBy({ id_publicacion: data.id_publicacion });
+    if (!publicacion) {
+      throw new Error('NOT_FOUND: La publicación no existe');
+    }
 
-  const publicacion = await publicacionRepo.findOneBy({ id_publicacion });
-  if (!publicacion) throw new Error('Publicación no encontrada');
+    // 2. Regla de Negocio (RF_4): Verificar si el usuario ya valoró esta publicación
+    const valoracionExistente = await this.valoracionRepo.findOne({
+      where: { id_usuario, id_publicacion: data.id_publicacion },
+    });
 
-  if (!Number.isInteger(puntuacion) || puntuacion < 1 || puntuacion > 5) {
-    throw new Error('Puntuación inválida (debe ser entero entre 1 y 5)');
-  }
+    if (valoracionExistente) {
+      throw new Error('BAD_REQUEST: Ya has valorado esta publicación anteriormente');
+    }
 
-  // comprobar si ya existe una valoración del mismo usuario a la misma publicación
-  const existente = await repo.findOne({ where: { id_usuario, id_publicacion } as any });
-  let guardada: ValoracionType;
-
-  if (existente) {
-    existente.puntuacion = puntuacion;
-    guardada = await repo.save(existente as any);
-  } else {
-    const nueva = repo.create({
+    // 3. Crear y guardar la nueva valoración
+    const nuevaValoracion = this.valoracionRepo.create({
       id_usuario,
-      id_publicacion,
-      usuario,
-      publicacion,
-      puntuacion,
-    } as unknown as ValoracionType);
-    guardada = await repo.save(nueva);
+      id_publicacion: data.id_publicacion,
+      puntuacion: data.puntuacion,
+    });
+    
+    await this.valoracionRepo.save(nuevaValoracion);
+
+    // 4. Recalcular y actualizar el promedio de la publicación
+    const { promedio } = await this.valoracionRepo
+      .createQueryBuilder('valoracion')
+      .select('AVG(valoracion.puntuacion)', 'promedio')
+      .where('valoracion.id_publicacion = :id_publicacion', { id_publicacion: data.id_publicacion })
+      .getRawOne();
+
+    // Guardamos el promedio redondeado a un decimal (ej: 4.5)
+    publicacion.promedio_valoracion = Math.round(parseFloat(promedio) * 10) / 10;
+    await this.publicacionRepo.save(publicacion);
+
+    return nuevaValoracion;
   }
-
-  // recalcular promedio de la publicación y actualizar (tipado seguro)
-  const todas = await repo.find({ where: { publicacion: { id_publicacion } as any } }) as unknown as ValoracionType[];
-  const sum = todas.reduce<number>((acc, v) => acc + (v.puntuacion ?? 0), 0);
-  const promedio = todas.length > 0 ? sum / todas.length : 0;
-  publicacion.promedio_valoracion = parseFloat(promedio.toFixed(2));
-  await publicacionRepo.save(publicacion);
-
-  return guardada;
-};
-
-export const obtenerPorPublicacion = async (id_publicacion: number): Promise<ValoracionType[]> => {
-  const repo = AppDataSource.getRepository(Valoracion);
-  return await repo.find({
-    where: { publicacion: { id_publicacion } as any },
-    relations: ['usuario', 'publicacion'],
-    order: { /* no fecha, keep default */ },
-  });
-};
-
-export const obtenerPorUsuario = async (id_usuario: number): Promise<ValoracionType[]> => {
-  const repo = AppDataSource.getRepository(Valoracion);
-  return await repo.find({
-    where: { usuario: { id_usuario } as any },
-    relations: ['usuario', 'publicacion'],
-    order: { /* no fecha, keep default */ },
-  });
-};
-
-export default {
-  crearValoracion,
-  obtenerPorPublicacion,
-  obtenerPorUsuario,
-};
+}
