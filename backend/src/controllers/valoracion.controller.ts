@@ -17,7 +17,7 @@ export async function crearValoracion(req: Request, res: Response): Promise<void
     // Validación in-controller
     const { error, value } = createValoracionSchema.validate(req.body, { abortEarly: false });
     if (error) {
-      sendError(res, error.details.map((d) => d.message).join(', '), 400);
+      sendError(res, error.details.map((d: any) => d.message).join(', '), 400);
       return;
     }
 
