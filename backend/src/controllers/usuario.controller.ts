@@ -39,7 +39,7 @@ export async function crearUsuario(req: Request, res: Response): Promise<void> {
   try {
     const { error, value } = createUsuarioSchema.validate(req.body, { abortEarly: false });
     if (error) {
-      sendError(res, error.details.map((d) => d.message).join(', '), 400);
+      sendError(res, error.details.map((d: any) => d.message).join(', '), 400);
       return;
     }
 
@@ -60,7 +60,7 @@ export async function actualizarUsuario(req: Request, res: Response): Promise<vo
 
     const { error, value } = updateUsuarioSchema.validate(req.body, { abortEarly: false });
     if (error) {
-      sendError(res, error.details.map((d) => d.message).join(', '), 400);
+      sendError(res, error.details.map((d: any) => d.message).join(', '), 400);
       return;
     }
 

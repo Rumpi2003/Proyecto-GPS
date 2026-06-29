@@ -16,7 +16,7 @@ export async function crearReporte(req: Request, res: Response): Promise<void> {
     // Validación in-controller (Estándar de tu equipo)
     const { error, value } = createReporteSchema.validate(req.body, { abortEarly: false });
     if (error) {
-      sendError(res, error.details.map((d) => d.message).join(', '), 400);
+      sendError(res, error.details.map((d: any) => d.message).join(', '), 400);
       return;
     }
 
@@ -45,7 +45,7 @@ export async function evaluarReporte(req: Request, res: Response): Promise<void>
 
     const { error, value } = evaluarReporteSchema.validate(req.body, { abortEarly: false });
     if (error) {
-      sendError(res, error.details.map((d) => d.message).join(', '), 400);
+      sendError(res, error.details.map((d: any) => d.message).join(', '), 400);
       return;
     }
 
