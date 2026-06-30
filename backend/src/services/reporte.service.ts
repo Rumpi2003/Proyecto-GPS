@@ -1,59 +1,83 @@
 import { AppDataSource } from '../config/db.config.js';
-import { Reporte, Motivo, Estado } from '../entities/reporte.entity.js';
+import { Reporte, Estado } from '../entities/reporte.entity.js';
 import { Usuario } from '../entities/usuario.entity.js';
 import { Publicacion } from '../entities/publicacion.entity.js';
-import type { Reporte as ReporteType } from '../entities/reporte.entity.js';
+import { MoreThanOrEqual } from 'typeorm';
 
-export const crearReporte = async (
-  id_usuario: number,
-  id_publicacion: number,
-  motivo: Motivo,
-  detalle?: string,
-): Promise<ReporteType> => {
-  const repo = AppDataSource.getRepository(Reporte);
-  const usuarioRepo = AppDataSource.getRepository(Usuario);
-  const publicacionRepo = AppDataSource.getRepository(Publicacion);
+export class ReporteService {
+  private reporteRepo = AppDataSource.getRepository(Reporte);
+  private usuarioRepo = AppDataSource.getRepository(Usuario);
+  private publicacionRepo = AppDataSource.getRepository(Publicacion);
 
+  async crear(id_usuario: number, data: Partial<Reporte>) {
+    const usuario = await this.usuarioRepo.findOneBy({ id_usuario });
+    if (!usuario) throw new Error('NOT_FOUND: Usuario no encontrado');
 
-  // Verificar si el usuario y la publicación existen (no se si esto se middleware a futuro, o en validations)
-  const usuario = await usuarioRepo.findOneBy({ id_usuario });
-  if (!usuario) throw new Error('Usuario no encontrado');
+    const publicacion = await this.publicacionRepo.findOneBy({ id_publicacion: Number(data.id_publicacion) });
+    if (!publicacion) throw new Error('NOT_FOUND: Publicación no encontrada');
 
-  const publicacion = await publicacionRepo.findOneBy({ id_publicacion });
-  if (!publicacion) throw new Error('Publicación no encontrada');
+    // Regla de Negocio (RF_5): Límite de 30 días
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hace30Dias.getDate() - 30);
 
-  const nuevo = repo.create({
-    usuario,
-    publicacion,
-    motivo,
-    detalle: detalle ?? null,
-    estado: Estado.PENDIENTE,
-  } as unknown as ReporteType);
+    const reportePrevio = await this.reporteRepo.findOne({
+      where: {
+        usuario: { id_usuario },
+        publicacion: { id_publicacion: publicacion.id_publicacion },
+        fecha_reporte: MoreThanOrEqual(hace30Dias),
+      },
+    });
 
-  return await repo.save(nuevo);
-};
+    if (reportePrevio) {
+      throw new Error('BAD_REQUEST: Ya has reportado esta publicación en los últimos 30 días');
+    }
 
-export const obtenerPorPublicacion = async (id_publicacion: number): Promise<ReporteType[]> => {
-  const repo = AppDataSource.getRepository(Reporte);
-  return await repo.find({
-    where: { publicacion: { id_publicacion } as any },
-    relations: ['usuario', 'publicacion'],
-    order: { fecha_reporte: 'DESC' },
-  });
-};
+    const nuevoReporte = this.reporteRepo.create({
+      usuario,
+      publicacion,
+      motivo: data.motivo,
+      detalle: data.detalle,
+      estado: Estado.PENDIENTE,
+    });
 
-export const obtenerPorUsuario = async (id_usuario: number): Promise<ReporteType[]> => {
-  const repo = AppDataSource.getRepository(Reporte);
-  return await repo.find({
-    where: { usuario: { id_usuario } as any },
-    relations: ['usuario', 'publicacion'],
-    order: { fecha_reporte: 'DESC' },
-  });
-};
+    return await this.reporteRepo.save(nuevoReporte);
+  }
 
-//Con esto podemos llamar a las funciones desde otros archivos
-export default {
-  crearReporte,
-  obtenerPorPublicacion,
-  obtenerPorUsuario,
-};
+  async evaluar(id_reporte: number, nuevoEstado: Estado) {
+    const reporte = await this.reporteRepo.findOne({
+      where: { id_reporte },
+      relations: ['publicacion'],
+    });
+
+    if (!reporte) throw new Error('NOT_FOUND: Reporte no encontrado');
+
+    reporte.estado = nuevoEstado;
+    await this.reporteRepo.save(reporte);
+
+    // Regla de Negocio (RF_12): Acumulación de reportes y baja
+    if (nuevoEstado === Estado.RESUELTO) { 
+      const LIMITE_REPORTES = 5;
+      
+      const reportesConfirmados = await this.reporteRepo.count({
+        where: {
+          publicacion: { id_publicacion: reporte.publicacion.id_publicacion },
+          estado: Estado.RESUELTO,
+        },
+      });
+
+      if (reportesConfirmados >= LIMITE_REPORTES) {
+        console.log(`ALERTA: La publicación ${reporte.publicacion.id_publicacion} alcanzó el límite de reportes.`);
+      }
+    }
+
+    return reporte;
+  }
+
+  async obtenerPendientes() {
+    return await this.reporteRepo.find({
+      where: { estado: Estado.PENDIENTE },
+      relations: ['usuario', 'publicacion'],
+      order: { fecha_reporte: 'ASC' },
+    });
+  }
+}
