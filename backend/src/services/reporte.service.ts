@@ -1,15 +1,21 @@
 import { AppDataSource } from '../config/db.config.js';
-import { Reporte, Estado } from '../entities/reporte.entity.js';
+import { Reporte, Estado, Motivo } from '../entities/reporte.entity.js';
 import { Usuario } from '../entities/usuario.entity.js';
 import { Publicacion } from '../entities/publicacion.entity.js';
 import { MoreThanOrEqual } from 'typeorm';
+
+type CrearReporteData = {
+    id_publicacion: number;
+    motivo: Motivo;
+    detalle?: string | null;
+};
 
 export class ReporteService {
   private reporteRepo = AppDataSource.getRepository(Reporte);
   private usuarioRepo = AppDataSource.getRepository(Usuario);
   private publicacionRepo = AppDataSource.getRepository(Publicacion);
 
-  async crear(id_usuario: number, data: Partial<Reporte>) {
+  async crear(id_usuario: number, data: CrearReporteData) {
     const usuario = await this.usuarioRepo.findOneBy({ id_usuario });
     if (!usuario) throw new Error('NOT_FOUND: Usuario no encontrado');
 
@@ -36,7 +42,7 @@ export class ReporteService {
       usuario,
       publicacion,
       motivo: data.motivo,
-      detalle: data.detalle,
+      detalle: data.detalle ?? null,
       estado: Estado.PENDIENTE,
     });
 
