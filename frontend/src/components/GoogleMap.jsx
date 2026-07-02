@@ -1,72 +1,100 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Wrapper } from '@googlemaps/react-wrapper';
-import { getUniversidades, getUniversidadById } from '../services/universidad.service';
 
-const render = (status) => <div>{status}</div>;
+const MAP_STYLES = [
+  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+  { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+];
 
-function Map({ center, zoom }) {
-  const ref = useRef(null);
+function obtenerLimitesMapa(center, radioKm) {
+  const radioTierra = 6371; // Radio de la Tierra en km
+  const latDelta = (radioKm / radioTierra) * (180 / Math.PI);
+  const lngDelta = latDelta / Math.cos((center.lat * Math.PI) / 180);
 
-  useEffect(() => {
-    if (!window.google || !ref.current) return;
-    new window.google.maps.Map(ref.current, { center, zoom });
-  }, [center, zoom]);
-
-  return <div ref={ref} style={{ width: '100%', height: '500px' }} />;
+  return {
+    north: center.lat + latDelta,
+    south: center.lat - latDelta,
+    east: center.lng + lngDelta,
+    west: center.lng - lngDelta,
+  };
 }
 
-export default function GoogleMap() {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const [universidades, setUniversidades] = useState([]);
-  const [universidadSeleccionada, setUniversidadSeleccionada] = useState(null);
+function Mapa({ center, nombre_universidad }) {
+  const containerRef = useRef(null);
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
+  const circleRef = useRef(null);
 
   useEffect(() => {
-    async function cargar() {
-      try {
-        const data = await getUniversidades();
-        setUniversidades(data);
-      } catch (e) {
-        console.error('Error cargando universidades', e);
-      }
-    }
-    cargar();
-  }, []);
+    if (!window.google || !containerRef.current || !center) return;
 
-  async function cargarUna(id) {
-    try {
-      const uni = await getUniversidadById(id);
-      setUniversidadSeleccionada(uni);
-    } catch (e) {
-      console.error('Error cargando universidad', e);
-    }
-  }
+    const limites = obtenerLimitesMapa(center, 5); // 5 km de radio
 
+    if (!mapRef.current) {
+      mapRef.current = new window.google.maps.Map(containerRef.current, {
+        center,
+        zoom: 14,
+        clickableIcons: false,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        restriction: {
+          latLngBounds: limites,
+          strictBounds: true,
+        },
+        styles: MAP_STYLES,
+      });
+    }
+
+    const mapa = mapRef.current;
+
+    mapa.setOptions({
+      center,
+      restriction: {
+        latLngBounds: limites,
+        strictBounds: true,
+      },
+      styles: MAP_STYLES,
+    });
+
+    mapa.fitBounds(limites);
+
+    if (markerRef.current)  markerRef.current.setMap(null);
+    markerRef.current = new window.google.maps.Marker({
+      position: center,
+      map: mapa,
+      title: nombre_universidad,
+    });
+
+    if (circleRef.current) circleRef.current.setMap(null);
+    circleRef.current = new window.google.maps.Circle({
+      map : mapa,
+      center,
+      radius: 5000, // 5 km
+      strokeColor: '#2563eb',
+      strokeOpacity: 0.7,
+      strokeWeight: 2,
+      fillColor: '#2563eb',
+      fillOpacity: 0.08,
+    });
+
+    return () => {
+      if (markerRef.current) markerRef.current.setMap(null);
+      if (circleRef.current) circleRef.current.setMap(null);
+    };
+
+
+  }, [center, nombre_universidad]);
+
+  return <div ref={containerRef} style={{ width: '100%', height: '70vh', borderRadius: '12' }} />;
+}
+
+export default function GoogleMap({ center, nombre_universidad }) {
+  const apiKet = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   return (
-    <div>
-      <Wrapper apiKey={apiKey} render={render}>
-        <Map center={{ lat: -36.82319530467122, lng: -73.01204075092664 }} zoom={14} />
-      </Wrapper>
-
-      <h3>Universidades</h3>
-      <ul>
-        {universidades.map((u) => (
-          <li key={u.id_universidad}>
-            {u.nombre_universidad}
-            <button onClick={() => cargarUna(u.id_universidad)}>
-              Ver detalle
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      {universidadSeleccionada && (
-        <div>
-          <h4>Detalle</h4>
-          <p>ID: {universidadSeleccionada.id_universidad}</p>
-          <p>Nombre: {universidadSeleccionada.nombre_universidad}</p>
-          <p>Dirección: {universidadSeleccionada.direccion}</p>
-        </div>
-      )}
-    </div>
+    <Wrapper apiKey={apiKet} render={(status) => <div>{status}</div>}>
+      <Mapa center={center} nombre_universidad={nombre_universidad} />
+    </Wrapper>
   );
 }
