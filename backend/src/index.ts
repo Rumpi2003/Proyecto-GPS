@@ -47,28 +47,28 @@ AppDataSource.initialize()
 
     // Se crean Universidades de Concepción según alcance del proyecto
 
-    // UBB
+    // UBB 1
     await universidadService.create({
     nombre_universidad: 'Universidad del Bío-Bío, Concepción',
     direccion: 'Collao 1202, Casilla 5-C, Concepción, Bío Bío, Chile',
     coordenadas: { type: 'Point', coordinates: [-73.01201929673114, -36.823169511968544] },
     });
 
-    // UdeC
+    // UdeC 2
     await universidadService.create({
       nombre_universidad: 'Universidad de Concepción',
       direccion: 'Edmundo Larenas 219, 4070409 Concepción, Bío Bío, Chile',
       coordenadas: { type: 'Point', coordinates: [-73.03570189999999, -36.8299341] },
     });
 
-    // UCSC
+    // UCSC 3
     await universidadService.create({
       nombre_universidad: 'Universidad Católica de la Santísima Concepción',
       direccion: 'Av. Alonso de Ribera 2850, Concepción, Bío Bío, Chile',
       coordenadas: { type: 'Point', coordinates: [-73.05591799999999, -36.79852580000001] },
     });
 
-    // USS
+    // USS 4
     await universidadService.create({
       nombre_universidad: 'Universidad San Sebastián, Campus Las Tres Pascualas',
       direccion: 'Lientur 1457, 4081339 Concepción, Bío Bío, Chile',

@@ -6,6 +6,7 @@ import publicacionRoutes from './publicacion.routes.js';
 import comentarioRoutes from './comentario.routes.js';
 import reporteRoutes from './reporte.routes.js';
 import valoracionRoutes from './valoracion.routes.js';
+import universidadRoutes from './universidad.routes.js';
 
 export default function routerApi(app: Application) {
     const router = Router();
@@ -18,4 +19,5 @@ export default function routerApi(app: Application) {
     router.use('/comentarios', comentarioRoutes);
     router.use('/reportes', reporteRoutes);
     router.use('/valoraciones', valoracionRoutes);
+    router.use('/universidades', universidadRoutes);
 }
