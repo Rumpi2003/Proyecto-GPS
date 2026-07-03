@@ -91,9 +91,9 @@ function Mapa({ center, nombre_universidad }) {
 }
 
 export default function GoogleMap({ center, nombre_universidad }) {
-  const apiKet = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   return (
-    <Wrapper apiKey={apiKet} render={(status) => <div>{status}</div>}>
+    <Wrapper apiKey={apiKey} render={(status) => <div>{status}</div>}>
       <Mapa center={center} nombre_universidad={nombre_universidad} />
     </Wrapper>
   );
