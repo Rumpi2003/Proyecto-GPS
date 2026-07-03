@@ -19,6 +19,15 @@ export class ComentarioService {
       throw new Error('BAD_REQUEST: Esta publicación tiene los comentarios deshabilitados');
     }
 
+    const comentarioExistente = await this.comentarioRepo.findOneBy({
+      id_usuario,
+      id_publicacion: data.id_publicacion,
+    });
+
+    if (comentarioExistente) {
+      throw new Error('BAD_REQUEST: Ya has comentado esta publicación');
+    }
+
     // 3. Crear el comentario
     const nuevoComentario = this.comentarioRepo.create({
       id_usuario,

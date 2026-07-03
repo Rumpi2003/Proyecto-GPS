@@ -17,7 +17,8 @@ import type { Foto as FotoType } from './foto.entity.js';
 export enum Estado {
   ACTIVA = 'activa',
   INACTIVA = 'inactiva',
-  ELIMINADA = 'eliminada'
+  ELIMINADA = 'eliminada',
+  PENDIENTE = 'pendiente',
 }
 
 @Entity({ name: 'publicacion' })
@@ -47,7 +48,7 @@ export class Publicacion {
 	@Column({ type: 'boolean', default: false })
 	permitir_comentarios!: boolean;
 
-	@Column({ type: 'enum', enum: Estado, default: Estado.ACTIVA })
+	@Column({ type: 'enum', enum: Estado, default: Estado.PENDIENTE })
 	estado!: Estado;
 
 	@Column({ type: 'varchar', length: 255 })

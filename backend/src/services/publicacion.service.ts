@@ -40,6 +40,7 @@ export class PublicacionService {
             .leftJoinAndSelect('publicacion.fotos', 'foto')
             .leftJoinAndSelect('publicacion.cercanias', 'cercania')
             .andWhere('cercania.id_universidad = :id_universidad', { id_universidad })
+            .andWhere('publicacion.estado = :estado', { estado: Estado.ACTIVA });
 
 
         if (precio_max != null) {
@@ -75,7 +76,7 @@ export class PublicacionService {
 
     async findOne(id_publicacion: number) {
         return this.repository.findOne({
-             where: { id_publicacion },
+            where: { id_publicacion },
             relations: ['publicante', 'etiquetas', 'fotos'],
         });
     }

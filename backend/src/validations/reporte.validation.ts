@@ -16,7 +16,7 @@ export const createReporteSchema = Joi.object({
 });
 
 export const evaluarReporteSchema = Joi.object({
-  estado: Joi.string().valid(Estado.EN_REVISION, Estado.RESUELTO, Estado.DESESTIMADO).required().messages({
+  estado: Joi.string().valid(Estado.PENDIENTE, Estado.CONFIRMADO, Estado.DESESTIMADO, Estado.ARCHIVADO).required().messages({
     'any.only': 'El estado debe ser válido para evaluación',
     'any.required': 'El estado es obligatorio para evaluar',
   }),

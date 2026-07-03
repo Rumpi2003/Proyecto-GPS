@@ -10,6 +10,7 @@ type CrearReporteData = {
     detalle?: string | null;
 };
 
+
 export class ReporteService {
   private reporteRepo = AppDataSource.getRepository(Reporte);
   private usuarioRepo = AppDataSource.getRepository(Usuario);
@@ -61,13 +62,13 @@ export class ReporteService {
     await this.reporteRepo.save(reporte);
 
     // Regla de Negocio (RF_12): Acumulación de reportes y baja
-    if (nuevoEstado === Estado.RESUELTO) { 
+    if (nuevoEstado === Estado.CONFIRMADO) { 
       const LIMITE_REPORTES = 5;
       
       const reportesConfirmados = await this.reporteRepo.count({
         where: {
           publicacion: { id_publicacion: reporte.publicacion.id_publicacion },
-          estado: Estado.RESUELTO,
+          estado: Estado.CONFIRMADO,
         },
       });
 

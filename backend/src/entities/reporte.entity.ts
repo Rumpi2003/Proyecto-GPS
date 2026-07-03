@@ -16,8 +16,8 @@ export enum Motivo {
 
 export enum Estado {
     PENDIENTE = 'pendiente',
-    EN_REVISION = 'en revisión',
-    RESUELTO = 'resuelto',
+    CONFIRMADO = 'confirmado',
+    ARCHIVADO = 'archivado',
     DESESTIMADO = 'desestimado',
 }
 
@@ -42,6 +42,13 @@ export class Reporte {
 
     @Column({ type: 'enum', enum: Estado, default: Estado.PENDIENTE })
     estado!: Estado;
+
+    // Campos opcionales para auditoría del reporte
+    //@Column({ type: 'varchar', length: 45, nullable: true })
+    //ip_reporte!: string | null;
+
+    //@Column({ type: 'varchar', length: 255, nullable: true })
+    //user_agent!: string | null;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     fecha_reporte!: Date;
