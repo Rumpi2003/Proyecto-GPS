@@ -8,7 +8,10 @@ import Home from './pages/Home.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <Home />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/map" element={<Map />} />
+      </Routes>
     </BrowserRouter>
   </StrictMode>,
 )

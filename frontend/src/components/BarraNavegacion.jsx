@@ -5,7 +5,7 @@ export const BarraNavegacion = () => {
     const navigate = useNavigate();
     // lógica para manejar la autenticación y el cierre de sesión
     // const { isAuthenticated, logout } = useAuth();
-    const isAuthenticated = true; // Simulación de estado de autenticación
+    const isAuthenticated = false; // Simulación de estado de autenticación
     
     // Función para manejar el cierre de sesión
     const handleLogout = () => {
@@ -29,7 +29,7 @@ export const BarraNavegacion = () => {
                 <div className="flex items-center gap-8">
                     <ul className="hidden lg:flex items-center gap-6 text-sm font-medium">
                         <li>
-                            <Link to="/universidades" className="hover:text-white/80 transition-colors">
+                            <Link to="/" className="hover:text-white/80 transition-colors">
                                 Universidades
                             </Link>
                         </li>

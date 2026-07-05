@@ -1,43 +1,93 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BarraNavegacion } from '../components/BarraNavegacion.jsx';
 import { BarraInferior } from '../components/BarraInferior.jsx';
 import { TarjetaUniversidad } from '../components/TarjetaUniversidad.jsx';
-import LogoUBB from '../assets/LogoUBB.png';
-import LogoUdeC from '../assets/LogoUdeC.webp';
-import LogoUSS from '../assets/LogoUSS.png';
-import LogoUCSC from '../assets/LogoUCSC.png';
+import { getUniversidades } from '../services/universidad.service.js';
+import LogoUBB from '../assets/logos/LogoUBB.png';
+import LogoUdeC from '../assets/logos/LogoUdeC.webp';
+import LogoUSS from '../assets/logos/LogoUSS.png';
+import LogoUCSC from '../assets/logos/LogoUCSC.png';
+import escudoUsuario from '../assets/iconos/escudo-de-usuario.svg';
+import marcadorMapa from '../assets/iconos/marcador-de-mapa.svg';
+import comentario from '../assets/iconos/comentario-alt.svg';
+
+function normalizarNombre(nombre) {
+    return String(nombre ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+}
+
+const logosPorNombre = {
+    'universidad del bio-bio': LogoUBB,
+    'universidad de concepcion': LogoUdeC,
+    'universidad catolica de la santisima concepcion': LogoUCSC,
+    'universidad san sebastian, campus las tres pascualas': LogoUSS,
+}
+
+function obtenerLogoUniversidad(nombre_universidad) {
+    const clave = normalizarNombre(nombre_universidad);
+    return logosPorNombre[clave] ?? LogoUBB; // Logo por defecto si no se encuentra
+}
 
 export default function Home() {
-    const universidades = [
-    {
-      id: 'ubb',
-      nombre: 'Universidad Del Bío-Bío',
-      direccion: 'Avenida Collao 1202, Concepción.',
-      logo: LogoUBB 
-    },
-    {
-      id: 'udec',
-      nombre: 'Universidad De Concepción',
-      direccion: 'Víctor Lamas 1290, Concepción.',
-      logo: LogoUdeC 
-    },
-    {
-      id: 'uss',
-      nombre: 'Universidad San Sebastián',
-      direccion: 'Lientur 1457, Concepción.',
-      logo: LogoUSS 
-    },
-    {
-      id: 'ucsc',
-      nombre: 'Universidad Católica de la Santísima Concepción',
-      direccion: 'Av. Alonso de Ribera 2850, Concepción.',
-      logo: LogoUCSC 
-    }
-  ];
+    const navigate = useNavigate();
+    const [universidades, setUniversidades] = useState([]);
+    const [cargando, setCargando] = useState(true);
+    const [error, setError] = useState('');
 
-  const handleSeleccionarUniversidad = (id) => {
-    console.log(`Universidad seleccionada: ${id}`);
-    // Aquí es donde redirige al buscador de arriendos por filtro de la universidad seleccionada.
+    useEffect(() => {
+        async function cargarUniversidades() {
+            try {
+                const data = await getUniversidades();
+                setUniversidades(Array.isArray(data) ? data : []);
+            } catch {
+                setError('Error al cargar las universidades');
+            } finally {
+                setCargando(false);
+            }
+        }
+        cargarUniversidades();
+    }, []);
+
+    const universidadesView = useMemo(() => {
+        return universidades.map((u) => ({
+            id: u.id_universidad,
+            nombre: u.nombre_universidad,
+            direccion: u.direccion,
+            logo: obtenerLogoUniversidad(u.nombre_universidad),
+        }))
+    }, [universidades]);
+
+  const handleSeleccionarUniversidad = (idUniversidad) => {
+    navigate('/map', { state: { universidadId: idUniversidad } });
   };
+
+  if (cargando) {
+    return (
+        <main className="flex flex-col min-h-screen">
+            <BarraNavegacion />
+            <div className="flex-grow flex items-center justify-center">
+                Cargando universidades...
+            </div>
+            <BarraInferior />
+        </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="flex flex-col min-h-screen">
+        <BarraNavegacion />
+        <div className="flex-grow flex items-center justify-center text-red-600">
+          {error}
+        </div>
+        <BarraInferior />
+      </main>
+    )
+  }
 
   return (
     // 'flex flex-col min-h-screen' hace que la pantalla sea un contenedor flexible
@@ -65,28 +115,28 @@ export default function Home() {
         </div>
 
         {/* Listado de Beneficios (Corregido el copy-paste del mockup) */}
-        <div className="space-y-4 my-2">
-          <div className="flex items-start gap-4">
-            <span className="text-2xl p-2 bg-ustay-bg rounded-xl">🛡️</span>
+        <div className="space-y-6 my-4">
+          <div className="flex items-start gap-5">
+            <img src={escudoUsuario} alt="Publicaciones Verificadas" className="w-10 h-10 p-2.5 bg-ustay-bg rounded-xl" />
             <div>
-              <h5 className="font-bold text-sm text-ustay-text">Publicaciones Verificadas</h5>
-              <p className="text-xs md:text-sm text-ustay-muted">Todas las publicaciones son revisadas y aprobadas por administradores para garantizar tu seguridad.</p>
+              <h5 className="font-bold text-base md:text-lg text-ustay-text">Publicaciones Verificadas</h5>
+              <p className="text-sm md:text-base text-ustay-muted">Todas las publicaciones son revisadas y aprobadas por administradores para garantizar tu seguridad.</p>
             </div>
           </div>
           
-          <div className="flex items-start gap-4">
-            <span className="text-2xl p-2 bg-ustay-bg rounded-xl">📍</span>
+          <div className="flex items-start gap-5">
+            <img src={marcadorMapa} alt="Ubicación Estratégica" className="w-10 h-10 p-2.5 bg-ustay-bg rounded-xl" />
             <div>
-              <h5 className="font-bold text-sm text-ustay-text">Ubicación Estratégica</h5>
-              <p className="text-xs md:text-sm text-ustay-muted">Filtra por cercanía y encuentra alojamiento a minutos de tu facultad, ya sea caminando o en transporte público.</p>
+              <h5 className="font-bold text-base md:text-lg text-ustay-text">Ubicación Estratégica</h5>
+              <p className="text-sm md:text-base text-ustay-muted">Filtra por cercanía y encuentra alojamiento a minutos de tu facultad, ya sea caminando o en transporte público.</p>
             </div>
           </div>
 
-          <div className="flex items-start gap-4">
-            <span className="text-2xl p-2 bg-ustay-bg rounded-xl">💬</span>
+          <div className="flex items-start gap-5">
+            <img src={comentario} alt="Comunidad Activa" className="w-10 h-10 p-2.5 bg-ustay-bg rounded-xl" />
             <div>
-              <h5 className="font-bold text-sm text-ustay-text">Comunidad Activa</h5>
-              <p className="text-xs md:text-sm text-ustay-muted">Lee comentarios y revisa las valoraciones reales de otros estudiantes antes de tomar tu decisión.</p>
+              <h5 className="font-bold text-base md:text-lg text-ustay-text">Comunidad Activa</h5>
+              <p className="text-sm md:text-base text-ustay-muted">Lee comentarios y revisa las valoraciones reales de otros estudiantes antes de tomar tu decisión.</p>
             </div>
           </div>
         </div>
@@ -97,7 +147,7 @@ export default function Home() {
             Para comenzar, selecciona tu universidad:
           </p>
           <div className="grid grid-cols-1 gap-3">
-            {universidades.map((uni) => (
+            {universidadesView.map((uni) => (
               <TarjetaUniversidad 
                 key={uni.id}
                 nombre={uni.nombre}
