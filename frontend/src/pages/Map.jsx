@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import GoogleMap from '../components/GoogleMap';
+import { BarraNavegacion } from '../components/BarraNavegacion';
+import { BarraInferior } from '../components/BarraInferior';
 import { getUniversidades } from '../services/universidad.service';
 import '../App.css';
 
@@ -38,6 +41,9 @@ function normalizarCoordenadas(coordenadas) {
 }
 
 export default function Map() {
+  const location = useLocation();
+  const idInicial = location.state?.universidadId;
+
   const [universidades, setUniversidades] = useState([]);
   const [idSeleccionado, setIdSeleccionado] = useState('');
   const [universidadSeleccionada, setUniversidadSeleccionada] = useState(null);
@@ -48,7 +54,16 @@ export default function Map() {
     async function cargarUniversidades() {
       try {
         const data = await getUniversidades();
-        setUniversidades(Array.isArray(data) ? data : []);
+        const lista = Array.isArray(data) ? data : [];
+        setUniversidades(lista);
+
+        if (idInicial != null) {
+          const uni = lista.find((u) => String(u.id_universidad) === String(idInicial));
+          if (uni) {
+            setUniversidadSeleccionada(uni);
+            setIdSeleccionado(String(uni.id_universidad));
+          }
+        }
       } catch (error) {
         setError('Error al cargar las universidades');
       } finally {
@@ -111,12 +126,21 @@ export default function Map() {
   }
 
   return (
-    <div style={{ padding: 24 }}>
+  <div className="flex flex-col min-h-screen">
+    <BarraNavegacion />
+
+    <main className="flex-grow px-6 py-6">
       <h1>{universidadSeleccionada.nombre_universidad}</h1>
       <button onClick={cambiarUniversidad} style={{ marginBottom: 12 }}>
         Cambiar universidad
       </button>
-      <GoogleMap center={center} universityName={universidadSeleccionada.nombre_universidad} />
-    </div>
+      <GoogleMap
+        center={center}
+        nombre_universidad={universidadSeleccionada.nombre_universidad}
+      />
+    </main>
+
+    <BarraInferior />
+  </div>
   );
 }
