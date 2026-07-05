@@ -39,7 +39,6 @@ export async function registrarUsuario(req: Request, res: Response): Promise<voi
     });
 
     const token = generarToken({ id: usuario.id_usuario, rol: usuario.rol });
-    sendSuccess(res, { usuario, token }, 'Registro exitoso', 201);
 
     res.cookie('jwt-auth', token, {
       httpOnly: false,
@@ -47,7 +46,9 @@ export async function registrarUsuario(req: Request, res: Response): Promise<voi
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 24h
       path: '/',
-    });      
+    });    
+
+    sendSuccess(res, { usuario, token }, 'Registro exitoso', 201);  
   } catch {
     sendError(res, 'Error al registrar usuario');
   }
@@ -74,7 +75,6 @@ export async function iniciarSesion(req: Request, res: Response): Promise<void> 
     }
 
     const token = generarToken({ id: usuario.id_usuario, rol: usuario.rol });
-    sendSuccess(res, { usuario, token }, 'Inicio de sesión exitoso');
 
     res.cookie('jwt-auth', token, {
       httpOnly: false,
@@ -83,6 +83,8 @@ export async function iniciarSesion(req: Request, res: Response): Promise<void> 
       maxAge: 24 * 60 * 60 * 1000, // 24h
       path: '/',
     });
+    
+    sendSuccess(res, { usuario, token }, 'Inicio de sesión exitoso');
   } catch {
     sendError(res, 'Error al iniciar sesión');
   }

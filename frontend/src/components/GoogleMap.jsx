@@ -71,7 +71,7 @@ function Mapa({ center, nombre_universidad }) {
     circleRef.current = new window.google.maps.Circle({
       map : mapa,
       center,
-      radius: 5000, // 5 km
+      radius: 2000, // 2 km
       strokeColor: '#2563eb',
       strokeOpacity: 0.7,
       strokeWeight: 2,

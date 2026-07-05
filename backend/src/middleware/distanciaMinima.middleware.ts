@@ -5,7 +5,7 @@ import { Universidad } from "../entities/universidad.entity.js";
 const universidadRepo = AppDataSource.getRepository(Universidad);
 
 export async function distanciaMinima(placeId: string) {
-    const maxDistance = 3000
+    const maxDistance = 2000; // 2km en metros
 
     const { lat, lng, formattedAddress, coordenadas } = await geocodingService.geocodePlaceId(placeId);
 

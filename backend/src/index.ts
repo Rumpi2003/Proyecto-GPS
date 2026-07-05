@@ -188,7 +188,7 @@ AppDataSource.initialize()
     });
 
     await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Bici parking',
+      nombreEtiqueta: 'Parking',
       url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
       id_categoria: 3,
     });
@@ -199,7 +199,11 @@ AppDataSource.initialize()
       id_categoria: 3,
     });
 
-
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Pet-friendly',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 3,
+    });
 
     //==========admin inicial==========
     const adminCorreo = process.env.ADMIN_CORREO;

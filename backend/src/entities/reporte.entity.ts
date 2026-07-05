@@ -8,7 +8,7 @@ export enum Motivo {
 	FRAUDE = 'sospecha fraude',
     INFORMACION_FALSA = 'información falsa',
     PRECIO_ENGAÑOSO = 'precio engañoso',
-    NO_DISPONIBLE = 'producto no disponible',
+    NO_DISPONIBLE = 'arriendo no disponible',
     PUBLICACION_DUPLICADA = 'publicación duplicada',
     CONTENIDO_INAPROPIADO = 'contenido inapropiado',
     OTRO = 'otro',

@@ -125,10 +125,6 @@ export class PublicacionService {
         return this.repository.remove(publicacion);
     }
 
-    // Falta método para que el admin "elimine" una publicación, es decir, no borrarla de la
-    // base de datos si no que dejarla en estado "eliminada". esto sería para que no se eliminen
-    // los reportes junto con las publicaciones (otra opción es sacar el OnDelete Cascade).
-
     // Método para crear la cercanía una vez se valída la distancia mínima con universidad
     // debería de ser llamado desde la funcion para crear una publicación en el controlador
     async createCercania(id_publicacion: number, id_universidad: number, distancia_metros: number) {
