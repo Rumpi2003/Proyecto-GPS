@@ -71,6 +71,12 @@ export class EtiquetaService {
         return await this.repository.find();
     }
 
+    async findAllEtiquetasConCategoria() {
+        return this.repository.find({
+            relations: ["categoria"],
+        });
+    }
+
     // Métodos para añadir y eliminar etiquetas de una publicación, sirve para que el usuario publicador
     // pueda manejar las etiquetas de sus publicaciones.
     async addEtiqueta(id_publicacion: number, id_etiqueta: number) {
@@ -103,43 +109,43 @@ export class EtiquetaService {
     }
 
     async validarEtiquetasNoExcluyentes(idsEtiquetas: number[]) {
-    const idsUnicos = [...new Set(idsEtiquetas.filter((id) => Number.isInteger(id) && id > 0))];
+        const idsUnicos = [...new Set(idsEtiquetas.filter((id) => Number.isInteger(id) && id > 0))];
 
-    if (idsUnicos.length <= 1) return;
+        if (idsUnicos.length <= 1) return;
 
-    const etiquetas = await this.repository.find({
-        where: { id_etiqueta: In(idsUnicos) },
-        relations: ["categoria"],
-    });
+        const etiquetas = await this.repository.find({
+            where: { id_etiqueta: In(idsUnicos) },
+            relations: ["categoria"],
+        });
 
-    if (etiquetas.length !== idsUnicos.length) {
-        throw new Error("Una o más etiquetas no existen");
+        if (etiquetas.length !== idsUnicos.length) {
+            throw new Error("Una o más etiquetas no existen");
+        }
+
+        const categoriasExcluyentes = new Map<number, { nombre: string; etiquetas: string[] }>();
+
+        for (const etiqueta of etiquetas) {
+            const categoria = etiqueta.categoria;
+            if (!categoria || !categoria.es_excluyente) continue;
+
+            const actual = categoriasExcluyentes.get(categoria.id_categoria) ?? {
+                nombre: categoria.nombre_categoria,
+                etiquetas: [],
+            };
+
+            actual.etiquetas.push(etiqueta.nombreEtiqueta);
+            categoriasExcluyentes.set(categoria.id_categoria, actual);
+        }
+
+        const conflictos = [...categoriasExcluyentes.values()]
+            .filter((c) => c.etiquetas.length > 1)
+            .map(
+                (c) =>
+                    `Categoría "${c.nombre}" contiene etiquetas excluyentes: ${c.etiquetas.join(", ")}`
+            );
+
+        if (conflictos.length > 0) {
+            throw new Error(`Conflicto de etiquetas excluyentes. ${conflictos.join(" | ")}`);
+        }
     }
-
-    const categoriasExcluyentes = new Map<number, { nombre: string; etiquetas: string[] }>();
-
-    for (const etiqueta of etiquetas) {
-        const categoria = etiqueta.categoria;
-        if (!categoria || !categoria.es_excluyente) continue;
-
-        const actual = categoriasExcluyentes.get(categoria.id_categoria) ?? {
-            nombre: categoria.nombre_categoria,
-            etiquetas: [],
-        };
-
-        actual.etiquetas.push(etiqueta.nombreEtiqueta);
-        categoriasExcluyentes.set(categoria.id_categoria, actual);
-    }
-
-    const conflictos = [...categoriasExcluyentes.values()]
-        .filter((c) => c.etiquetas.length > 1)
-        .map(
-            (c) =>
-                `Categoría "${c.nombre}" contiene etiquetas excluyentes: ${c.etiquetas.join(", ")}`
-        );
-
-    if (conflictos.length > 0) {
-        throw new Error(`Conflicto de etiquetas excluyentes. ${conflictos.join(" | ")}`);
-    }
-}
 }
