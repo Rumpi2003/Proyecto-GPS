@@ -86,30 +86,59 @@ export default function Map() {
     setUniversidadSeleccionada(null);
   }
 
-  if (cargando) return <div>Cargando universidades...</div>;
-  if (error) return <div>{error}</div>;
+  if (cargando) return (
+    <div className="flex flex-col min-h-screen">
+    <BarraNavegacion />
+
+    <main className="flex-grow px-6 py-6">
+      <div>Cargando universidades...</div>
+    </main>
+
+    <BarraInferior />
+  </div>
+  ); 
+  
+  if (error) return (
+    <div className="flex flex-col min-h-screen">
+      <BarraNavegacion />
+
+      <main className="flex-grow px-6 py-6">
+        <div className="text-red-600">{error}</div>
+      </main>
+
+      <BarraInferior />
+    </div>
+  );
 
   if (!universidadSeleccionada) {
     return (
-      <div style={{ padding: 24 }}>
-        <h1>Selecciona una universidad</h1>
+      <div className="flex flex-col min-h-screen">
+        <BarraNavegacion />
 
-        <select
-          value={idSeleccionado}
-          onChange={(e) => setIdSeleccionado(e.target.value)}
-          style={{ minWidth: 320, padding: 8, marginRight: 12 }}
-        >
-          <option value=''>Selecciona una universidad</option>
-          {universidades.map((u) => (
-            <option key={u.id_universidad} value={u.id_universidad}>
-              {u.nombre_universidad}
-            </option>
-          ))}
-        </select>
+        <main className="flex-grow px-6 py-6">
+          <div style={{ padding: 24 }}>
+            <h1>Selecciona una universidad</h1>
 
-        <button onClick={continuar} disabled={!puedeContinuar}>
-          Continuar
-        </button>
+            <select
+              value={idSeleccionado}
+              onChange={(e) => setIdSeleccionado(e.target.value)}
+              style={{ minWidth: 320, padding: 8, marginRight: 12 }}
+            >
+              <option value=''>Selecciona una universidad</option>
+              {universidades.map((u) => (
+                <option key={u.id_universidad} value={u.id_universidad}>
+                  {u.nombre_universidad}
+                </option>
+              ))}
+            </select>
+
+            <button onClick={continuar} disabled={!puedeContinuar}>
+              Continuar
+            </button>
+          </div>
+        </main>
+
+        <BarraInferior />
       </div>
     );
   }
@@ -118,9 +147,17 @@ export default function Map() {
 
   if (!center) {
     return (
-      <div style={{ padding: 24 }}>
-        <p>No se pudieron obtener las coordenadas de la universidad seleccionada.</p>
-        <button onClick={cambiarUniversidad}>Cambiar universidad</button>
+      <div className="flex flex-col min-h-screen">
+        <BarraNavegacion />
+        
+        <main className="flex-grow px-6 py-6">
+          <div style={{ padding: 24 }}>
+            <p>No se pudieron obtener las coordenadas de la universidad seleccionada.</p>
+            <button onClick={cambiarUniversidad}>Cambiar universidad</button>
+          </div>
+        </main>
+
+        <BarraInferior />
       </div>
     );
   }

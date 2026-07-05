@@ -67,17 +67,25 @@ export default function Home() {
 
   if (cargando) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Cargando universidades...
-      </div>
+        <main className="flex flex-col min-h-screen">
+            <BarraNavegacion />
+            <div className="flex-grow flex items-center justify-center">
+                Cargando universidades...
+            </div>
+            <BarraInferior />
+        </main>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-red-600">
-        {error}
-      </div>
+      <main className="flex flex-col min-h-screen">
+        <BarraNavegacion />
+        <div className="flex-grow flex items-center justify-center text-red-600">
+          {error}
+        </div>
+        <BarraInferior />
+      </main>
     )
   }
 
