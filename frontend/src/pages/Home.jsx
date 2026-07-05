@@ -162,7 +162,7 @@ export default function Home() {
 
           {/* Sección de Selección de Universidades */}
           <div className="space-y-4">
-            <p className="text-xs font-bold uppercase tracking-wider text-ustay-muted">
+            <p className="text-xs font-bold uppercase tracking-wider text-ustay-muted font-poppins">
               Para comenzar, selecciona tu universidad:
             </p>
             <div className="grid grid-cols-1 gap-3">

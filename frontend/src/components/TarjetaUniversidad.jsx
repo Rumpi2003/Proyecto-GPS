@@ -4,7 +4,7 @@ export const TarjetaUniversidad = ({ nombre, direccion, logoUrl, onClick }) => {
   return (
     <button 
       onClick={onClick}
-      className="w-full flex items-center gap-5 bg-ustay-card hover:bg-slate-200/60 p-4 rounded-ustay-card border border-slate-200/40 shadow-sm transition-all text-left group active:scale-[0.99]"
+      className="w-full flex items-center gap-5 bg-ustay-card hover:bg-slate-200/60 p-4 rounded-ustay-card border border-slate-200/40 shadow-sm transition-all text-left group active:scale-[0.99] font-poppins"
     >
       <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center p-2.5 shadow-sm border border-slate-100 flex-shrink-0">
         <img 

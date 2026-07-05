@@ -31,6 +31,8 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
 
         const { place_id, titulo, descripcion, precio, telefono, permitir_comentarios, url_fotos = [], url_portada, etiquetas = [] } = value;
 
+        await etiquetaService.validarEtiquetasNoExcluyentes(etiquetas);
+
         // Validar que este dentro del rango de 3000m de una universidad
         const resultados = await distanciaMinima(place_id);
 
@@ -185,6 +187,17 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
                 await publicacionService.addFoto(id, fotoUrl, false);
             }
         }
+
+        const idsActuales = (publicacion.etiquetas ?? []).map((e) => e.id_etiqueta);
+
+        const idsFinales = [
+            ...new Set([
+                ...idsActuales.filter((id) => !eliminar_etiquetas.includes(id)),
+                ...nuevas_etiquetas,
+            ]),
+        ];
+
+        await etiquetaService.validarEtiquetasNoExcluyentes(idsFinales);
 
         // Eliminar etiquetas
         for (const idEtiqueta of eliminar_etiquetas) {

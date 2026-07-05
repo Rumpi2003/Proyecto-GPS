@@ -1,6 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne } from 'typeorm';
 import { Publicacion } from './publicacion.entity.js';
 import type { Publicacion as PublicacionType } from './publicacion.entity.js';
+import { CategoriaEtiqueta } from './categoriaEtiqueta.entity.js';
+import type { CategoriaEtiqueta as CategoriaEtiquetaType } from './categoriaEtiqueta.entity.js';
 
 @Entity({ name: 'etiqueta' })
 export class Etiqueta {
@@ -15,4 +17,7 @@ export class Etiqueta {
 
 	@ManyToMany(() => Publicacion, (publicacion) => publicacion.etiquetas)
 	publicaciones!: PublicacionType[];
+
+	@ManyToOne(() => CategoriaEtiqueta, (categoria) => categoria.etiquetas)
+	categoria!: CategoriaEtiquetaType;
 }

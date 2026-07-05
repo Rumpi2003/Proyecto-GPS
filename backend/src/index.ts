@@ -9,6 +9,8 @@ import { dirname, resolve } from 'path';
 import routerApi from './routes/index.routes.js';
 import { AppDataSource } from './config/db.config.js';
 import { UniversidadService } from './services/universidad.service.js';
+import { EtiquetaService } from './services/etiqueta.service.js';
+import { CategoriaEtiquetaService } from './services/categoriaEtiqueta.service.js';
 import { crearAdminSiNoExiste } from './services/usuario.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -50,6 +52,8 @@ AppDataSource.initialize()
     console.log('Conexión a la base de datos establecida');
 
     const universidadService = new UniversidadService();
+    const categoriaEtiquetaService = new CategoriaEtiquetaService();
+    const etiquetaService = new EtiquetaService();
 
     // Se crean Universidades de Concepción según alcance del proyecto
 
@@ -80,6 +84,123 @@ AppDataSource.initialize()
       direccion: 'Lientur 1457, 4081339 Concepción, Bío Bío, Chile',
       coordenadas: { type: 'Point', coordinates: [-73.0426492, -36.81299660000001] },
     });
+
+    // Se crean Categorías de Etiquetas según alcance del proyecto
+    await categoriaEtiquetaService.create({
+      nombre_categoria: 'genero',
+      es_excluyente: true,
+    });
+    await categoriaEtiquetaService.create({
+      nombre_categoria: 'propiedad',
+      es_excluyente: true,
+    });
+    await categoriaEtiquetaService.create({
+      nombre_categoria: 'servicio',
+      es_excluyente: false,
+    });
+
+    // Se crean Etiquetas según alcance del proyecto
+    // Segun la categoría genero (id_categoria: 1)
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Solo Hombres',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 1,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Solo Mujeres',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 1,
+    });
+
+    // Segun la categoría propiedad (id_categoria: 2)
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Pieza',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 2,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Departamento',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 2,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Pensión',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 2,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Residencia',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 2,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Casa',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 2,
+    });
+
+    // Segun la categoría servicio (id_categoria: 3)
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Wi-fi alta velocidad',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 3,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Baño privado',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 3,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Amoblado',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 3,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Calefacción',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 3,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Lavandería',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 3,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Agua caliente',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 3,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Cocina',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 3,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Bici parking',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 3,
+    });
+
+    await etiquetaService.createEtiqueta({
+      nombreEtiqueta: 'Aseo',
+      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+      id_categoria: 3,
+    });
+
+
+
     //==========admin inicial==========
     const adminCorreo = process.env.ADMIN_CORREO;
     const adminNombre = process.env.ADMIN_NOMBRE;
