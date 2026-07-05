@@ -4,3 +4,15 @@
 body {
   @apply bg-ustay-bg text-ustay-text antialiased;
 }
+
+@layer components {
+  .titulo {
+    @apply font-poppins text-titulo text-type-title;
+  }
+  .subtitulo {
+    @apply font-poppins text-subtitulo text-type-subtitle;
+  }
+  .texto {
+    @apply font-poppins text-texto text-type-body;
+  }
+}

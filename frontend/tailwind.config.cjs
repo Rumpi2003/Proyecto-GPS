@@ -3,31 +3,40 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Los colores exactos de U-STAY
         ustay: {
-          blue: '#2b82ea',       // El azul del Navbar y del título principal
-          'blue-dark': '#1a6fd3',// Azul más oscuro para los botones/hovers
-          bg: '#e3effd',         // El fondo celeste suave exterior
-          card: '#f4f7fc',       // El fondo gris/azul de las tarjetas de universidades
-          text: '#1e293b',       // Texto principal (slate-800)
-          muted: '#64748b',      // Texto secundario (slate-500)
+          blue: "#2b82ea",
+          "blue-dark": "#1a6fd3",
+          bg: "#e3effd",
+          card: "#f4f7fc",
+          text: "#1e293b",
+          muted: "#64748b",
         },
         danger: {
-          low: '#fef2f2',     // Rojo ultra claro (ideal para el fondo de una tarjeta de alerta)
-          DEFAULT: '#ef4444', // Rojo estándar (para textos de error, iconos y botones)
-          hover: '#dc2626',   // Rojo más oscuro (para cuando pasas el mouse por encima)
+          low: "#fef2f2",
+          DEFAULT: "#ef4444",
+          hover: "#dc2626",
+        },
+        type: {
+          title: "#2563EB",
+          subtitle: "#1F2937",
+          body: "#6B7280",
         },
       },
       borderRadius: {
-        // El gran panel blanco central del mockup tiene esquinas muy redondeadas
-        'panel': '28px',
-        // Las fotos laterales y las tarjetas de las universidades
-        'ustay-card': '18px',
+        panel: "28px",
+        "ustay-card": "18px",
       },
       boxShadow: {
-        // Un sombreado muy sutil para que el panel flote sobre el fondo celeste
-        'soft': '0 4px 20px -2px rgba(43, 130, 234, 0.08)',
-      }
+        soft: "0 4px 20px -2px rgba(43, 130, 234, 0.08)",
+      },
+      fontFamily: {
+        poppins: ["Poppins", "sans-serif"],
+      },
+      fontSize: {
+        titulo: ["30px", { fontWeight: 600, lineHeight: "1.2" }],
+        subtitulo: ["22px", { fontWeight: 400, lineHeight: "1.3" }],
+        texto: ["18px", { lineHeight: "1.5" }],
+      },
     },
   },
   plugins: [],
