@@ -1,6 +1,8 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 import { Usuario } from '../entities/usuario.entity.js';
 import { Publicacion } from '../entities/publicacion.entity.js';
 import { Comentario } from '../entities/comentario.entity.js';
@@ -11,7 +13,10 @@ import { Valoracion } from '../entities/valoracion.entity.js';
 import { Reporte } from '../entities/reporte.entity.js';
 import { Foto } from '../entities/foto.entity.js';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config({ path: resolve(__dirname, '../../../.env') });
 
 function getEnvVar(name: string): string {
   const value = process.env[name];

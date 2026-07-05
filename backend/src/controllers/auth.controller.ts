@@ -71,28 +71,3 @@ export async function iniciarSesion(req: Request, res: Response): Promise<void> 
     sendError(res, 'Error al iniciar sesión');
   }
 }
-
-//==========================================
-//usuario admin inicial
-export async function crearAdminInicial(req: Request, res: Response): Promise<void> {
-  try {
-    const existente = await usuarioService.obtenerPorCorreo('admin@gmail.com');
-    if (existente) {
-      sendError(res, 'El admin ya existe', 409);
-      return;
-    }
-
-    const hashed = await encriptarContraseña('admin123');
-    const usuario = await usuarioService.crear({
-      correo: 'admin@gmail.com',
-      contraseña: hashed,
-      nombre: 'admin',
-      rol: Rol.ADMINISTRADOR,
-    });
-
-    const token = generarToken({ id: usuario.id_usuario, rol: usuario.rol });
-    sendSuccess(res, { usuario, token }, 'Admin creado exitosamente', 201);
-  } catch {
-    sendError(res, 'Error al crear admin');
-  }
-}

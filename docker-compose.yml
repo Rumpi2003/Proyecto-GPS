@@ -45,6 +45,9 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
       GOOGLE_GEOCODE_API_KEY: ${GOOGLE_GEOCODE_API_KEY}
+      ADMIN_NOMBRE: ${ADMIN_NOMBRE}
+      ADMIN_CORREO: ${ADMIN_CORREO}
+      ADMIN_CONTRASEÑA: ${ADMIN_PASSWORD}
     ports:
       - "5000:5000"
     depends_on:

@@ -1,5 +1,6 @@
 import { AppDataSource } from '../config/db.config.js';
-import { Usuario } from '../entities/usuario.entity.js';
+import { Usuario, Rol } from '../entities/usuario.entity.js';
+import { encriptarContraseña } from './auth.service.js';
 
 const usuarioRepository = AppDataSource.getRepository(Usuario);
 
@@ -31,4 +32,22 @@ export async function eliminar(id: number): Promise<boolean> {
 
 export async function obtenerPorCorreo(correo: string): Promise<Usuario | null> {
   return await usuarioRepository.findOneBy({ correo });
+}
+
+export async function crearAdminSiNoExiste(correo: string, nombre: string, contraseña: string): Promise<void> {
+  const existente = await obtenerPorCorreo(correo);
+  if (existente) {
+    console.log(`Admin ya existe: ${correo}`);
+    return;
+  }
+
+  const hashed = await encriptarContraseña(contraseña);
+  await crear({
+    correo,
+    contraseña: hashed,
+    nombre,
+    rol: Rol.ADMINISTRADOR,
+  });
+
+  console.log(`Admin inicial creado: ${correo}`);
 }

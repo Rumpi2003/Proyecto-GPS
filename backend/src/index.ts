@@ -4,11 +4,17 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 import routerApi from './routes/index.routes.js';
 import { AppDataSource } from './config/db.config.js';
 import { UniversidadService } from './services/universidad.service.js';
+import { crearAdminSiNoExiste } from './services/usuario.service.js';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config({ path: resolve(__dirname, '../../.env') });
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 5000;
@@ -74,6 +80,14 @@ AppDataSource.initialize()
       direccion: 'Lientur 1457, 4081339 Concepción, Bío Bío, Chile',
       coordenadas: { type: 'Point', coordinates: [-73.0426492, -36.81299660000001] },
     });
+    //==========admin inicial==========
+    const adminCorreo = process.env.ADMIN_CORREO;
+    const adminNombre = process.env.ADMIN_NOMBRE;
+    const adminContraseña = process.env.ADMIN_PASSWORD;
+
+    if (adminCorreo && adminNombre && adminContraseña) {
+      await crearAdminSiNoExiste(adminCorreo, adminNombre, adminContraseña);
+    }
 
     app.listen(Number(PORT),'0.0.0.0', () => {
       console.log(`Servidor corriendo en el puerto ${PORT}`);
