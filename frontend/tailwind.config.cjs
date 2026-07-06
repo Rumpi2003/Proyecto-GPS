@@ -6,6 +6,7 @@ module.exports = {
         ustay: {
           blue: "#2b82ea",
           "blue-dark": "#1a6fd3",
+          "light-border": "#B6D5FE",
           bg: "#e3effd",
           card: "#f4f7fc",
           text: "#1e293b",
