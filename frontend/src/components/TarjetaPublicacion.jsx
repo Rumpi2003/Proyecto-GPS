@@ -57,20 +57,27 @@ export default function TarjetaPublicacion({
           </div>
 
           <p className="texto text-sm">
-            Distancia: {distancia != null ? `${distancia} m` : "Sin dato"}
+            A {distancia != null ? `${distancia} m` : "Sin dato"} de la universidad
           </p>
 
-          <p className="texto text-sm">
-            Precio: ${formatearPrecio(publicacion.precio)}
-          </p>
+          <div className="inline-flex items-center w-fit rounded-full bg-emerald-100 px-3 py-1">
+            <p className="text-lg font-bold text-emerald-700">
+                ${formatearPrecio(publicacion.precio)}
+            </p>
+          </div>
 
           <div className="flex flex-wrap gap-2">
             {visibles.map((etiqueta) => (
               <span
                 key={etiqueta.id_etiqueta}
-                className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 whitespace-nowrap"
               >
-                {etiqueta.nombreEtiqueta}
+                <img
+                    src={etiqueta.url_icono}
+                    alt={etiqueta.nombreEtiqueta}
+                    className="block w-4 h-4 object-contain shrink-0"
+                />
+                <span>{etiqueta.nombreEtiqueta}</span>
               </span>
             ))}
 
@@ -80,6 +87,7 @@ export default function TarjetaPublicacion({
               </span>
             )}
           </div>
+
         </div>
       </div>
     </article>

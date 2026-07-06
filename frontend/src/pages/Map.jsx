@@ -73,12 +73,15 @@ export default function Map() {
   const [cargandoPublicaciones, setCargandoPublicaciones] = useState(false);
   const [error, setError] = useState("");
 
-  const [filtros, setFiltros] = useState({
+  const filtrosIniciales = {
     distancia_max: 2000,
     ids_etiquetas: [],
     precio_max: "",
-    valoracion_min: "",
-  });
+    valoracion_min: 0,
+  };
+
+  const [filtrosDraft, setFiltrosDraft] = useState(filtrosIniciales);
+  const [filtrosAplicados, setFiltrosAplicados] = useState(filtrosIniciales);
 
   useEffect(() => {
     async function cargarInicial() {
@@ -116,18 +119,19 @@ export default function Map() {
 
         const params = {
           id_universidad: universidadSeleccionada.id_universidad,
-          distancia_max: filtros.distancia_max || undefined,
-          precio_max: filtros.precio_max || undefined,
-          valoracion_min: filtros.valoracion_min || undefined,
-          ids_etiquetas: filtros.ids_etiquetas.length
-            ? filtros.ids_etiquetas.join(",")
+          distancia_max: filtrosAplicados.distancia_max || undefined,
+          precio_max: filtrosAplicados.precio_max || undefined,
+          valoracion_min: filtrosAplicados.valoracion_min || undefined,
+          ids_etiquetas: filtrosAplicados.ids_etiquetas.length
+            ? filtrosAplicados.ids_etiquetas.join(",")
             : undefined,
         };
 
         const data = await getPublicacionesFiltradas(params);
         setPublicaciones(Array.isArray(data) ? data : []);
         setPublicacionSeleccionada(null);
-      } catch {
+      } catch(err) {
+        console.error("Error al cargar publicaciones:", err);
         setError("Error al cargar publicaciones");
       } finally {
         setCargandoPublicaciones(false);
@@ -135,7 +139,7 @@ export default function Map() {
     }
 
     cargarPublicaciones();
-  }, [universidadSeleccionada, filtros]);
+  }, [universidadSeleccionada, filtrosAplicados]);
 
   const center = useMemo(() => {
     return normalizarCoordenadas(universidadSeleccionada?.coordenadas);
@@ -208,13 +212,19 @@ export default function Map() {
 
       <main className="flex-grow max-w-[1600px] mx-auto w-full px-6 py-6 pb-28">
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_640px] gap-6 items-start">
-          <aside className="bg-white rounded-panel shadow-soft border border-slate-100 p-5 sticky top-6 max-h-[calc(100vh-11rem)] overflow-y-auto">            <FiltrosPublicacion
+          <aside className="bg-white rounded-panel shadow-soft border border-slate-100 p-5 sticky top-6 max-h-[calc(100vh-11rem)] overflow-y-auto">
+            <FiltrosPublicacion
               universidades={universidades}
               universidadSeleccionada={universidadSeleccionada}
               etiquetas={etiquetas}
-              filtros={filtros}
-              onChangeFiltros={setFiltros}
+              filtros={filtrosDraft}
+              onChangeFiltros={setFiltrosDraft}
               onChangeUniversidad={cambiarUniversidad}
+              onAplicarFiltros={() => setFiltrosAplicados(filtrosDraft)}
+              onLimpiarFiltros={() => {
+                setFiltrosDraft(filtrosIniciales);
+                setFiltrosAplicados(filtrosIniciales);
+              }}
             />
           </aside>
 

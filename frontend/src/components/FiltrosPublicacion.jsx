@@ -5,6 +5,8 @@ export default function FiltrosPublicacion({
   filtros,
   onChangeFiltros,
   onChangeUniversidad,
+  onAplicarFiltros,
+  onLimpiarFiltros,
 }) {
   const categorias = etiquetas.reduce((acc, etiqueta) => {
     const categoria = etiqueta.categoria;
@@ -28,13 +30,39 @@ export default function FiltrosPublicacion({
     const actual = filtros.ids_etiquetas ?? [];
     const existe = actual.includes(idEtiqueta);
 
-    const siguientes = existe
-      ? actual.filter((id) => id !== idEtiqueta)
-      : [...actual, idEtiqueta];
+    // Mapa id_etiqueta -> etiqueta completa (con categoria)
+    const etiquetaPorId = new Map(etiquetas.map((e) => [e.id_etiqueta, e]));
+    const etiquetaObjetivo = etiquetaPorId.get(idEtiqueta);
+
+    if (!etiquetaObjetivo) return;
+
+    const categoriaObjetivo = etiquetaObjetivo.categoria;
+    const esExcluyente = Boolean(categoriaObjetivo?.es_excluyente);
+    const idCategoriaObjetivo = categoriaObjetivo?.id_categoria;
+
+    let siguientes = actual;
+
+    // Si la categoría es excluyente, primero removemos cualquier etiqueta
+    // ya seleccionada de esa misma categoría.
+    if (esExcluyente && idCategoriaObjetivo != null) {
+        siguientes = actual.filter((id) => {
+        const e = etiquetaPorId.get(id);
+        return e?.categoria?.id_categoria !== idCategoriaObjetivo;
+        });
+    }
+
+    // Comportamiento toggle normal:
+    // - si ya estaba seleccionada, la quitamos
+    // - si no estaba, la agregamos
+    if (existe) {
+        siguientes = siguientes.filter((id) => id !== idEtiqueta);
+    } else {
+        siguientes = [...siguientes, idEtiqueta];
+    }
 
     onChangeFiltros({
-      ...filtros,
-      ids_etiquetas: siguientes,
+        ...filtros,
+        ids_etiquetas: siguientes,
     });
   }
 
@@ -95,22 +123,28 @@ export default function FiltrosPublicacion({
       </div>
 
       <div>
-        <label className="block texto text-sm mb-2">Valoración mínima</label>
+        <label className="block texto text-sm mb-2">
+            Valoración mínima: {Number(filtros.valoracion_min ?? 0).toFixed(1)}
+        </label>
         <input
-          type="number"
-          min="0"
-          max="5"
-          step="0.1"
-          value={filtros.valoracion_min}
-          onChange={(e) =>
-            onChangeFiltros({
-              ...filtros,
-              valoracion_min: e.target.value,
-            })
-          }
-          className="w-full rounded-ustay-card border border-slate-200 px-3 py-2"
-        />
-      </div>
+            type="range"
+            min="0"
+            max="5"
+            step="0.5"
+            value={filtros.valoracion_min ?? 0}
+            onChange={(e) =>
+                onChangeFiltros({
+                    ...filtros,
+                    valoracion_min: Number(e.target.value),
+                })
+            }
+            className="w-full"
+            />
+            <div className="flex justify-between text-xs text-ustay-muted mt-1">
+                <span>0</span>
+                <span>5</span>
+            </div>
+        </div>
 
       <div>
         <h3 className="subtitulo text-[18px] mb-3">Etiquetas</h3>
@@ -143,6 +177,13 @@ export default function FiltrosPublicacion({
                         checked={checked}
                         onChange={() => toggleEtiqueta(etiqueta.id_etiqueta)}
                       />
+
+                      <img
+                        src={etiqueta.url_icono}
+                        alt={etiqueta.nombreEtiqueta}
+                        className="w-5 h-5 object-contain shrink-0"
+                      />
+
                       <span className="text-sm">{etiqueta.nombreEtiqueta}</span>
                     </label>
                   );
@@ -150,6 +191,24 @@ export default function FiltrosPublicacion({
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="pt-2 flex gap-2">
+            <button
+                type="button"
+                onClick={onAplicarFiltros}
+                className="flex-1 rounded-ustay-card bg-ustay-blue text-white font-semibold py-2.5 hover:bg-ustay-blue-dark transition-colors"
+            >
+                Filtrar
+            </button>
+
+            <button
+                type="button"
+                onClick={onLimpiarFiltros}
+                className="rounded-ustay-card border border-slate-300 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+                Limpiar
+            </button>
         </div>
       </div>
     </div>
