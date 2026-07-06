@@ -25,7 +25,7 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
         });
 
         if (error) {
-            sendError(res, error.details.map((d) => d.message).join(', '), 400);
+            sendError(res, error.details.map((d) => d.message), 400);
             return;
         }
 
@@ -33,11 +33,11 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
 
         await etiquetaService.validarEtiquetasNoExcluyentes(etiquetas);
 
-        // Validar que este dentro del rango de 3000m de una universidad
+        // Validar que esté dentro del rango de 2000m de una universidad
         const resultados = await distanciaMinima(place_id);
 
         if (!resultados || resultados.length === 0) {
-            sendError(res, 'la publicación debe estar a máximo 3000 metros de una universidad', 400);
+            sendError(res, 'la publicación debe estar a máximo 2000 metros de una universidad', 400);
             return;
         }
 
@@ -122,12 +122,12 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
         });
 
         if (paramsError) {
-            sendError(res, paramsError.details.map((d) => d.message).join(', '), 400);
+            sendError(res, paramsError.details.map((d) => d.message), 400);
             return;
         }
 
         if (bodyError) {
-            sendError(res, bodyError.details.map((d) => d.message).join(', '), 400);
+            sendError(res, bodyError.details.map((d) => d.message), 400);
             return;
         }
 
@@ -229,7 +229,7 @@ export async function eliminarPublicacion(req: Request, res: Response): Promise<
         });
 
         if (error) {
-            sendError(res, error.details.map((d) => d.message).join(', '), 400);
+            sendError(res, error.details.map((d) => d.message), 400);
             return;
         }
         const id = Number(value.id_publicacion);
@@ -254,7 +254,7 @@ export async function obtenerPublicacionesPorFiltros(req: Request, res: Response
         });
 
         if (error) {
-            sendError(res, error.details.map((d) => d.message).join(', '), 400);
+            sendError(res, error.details.map((d) => d.message), 400);
             return;
         }
 
@@ -320,7 +320,7 @@ export async function obtenerPublicacionesUsuario(req: Request, res: Response): 
         });
 
         if (error) {
-            sendError(res, error.details.map((d) => d.message).join(', '), 400);
+            sendError(res, error.details.map((d) => d.message), 400);
             return;
         }
 
@@ -341,7 +341,7 @@ export async function obtenerPublicacionesActivasUsuario(req: Request, res: Resp
         });
 
         if (error) {
-            sendError(res, error.details.map((d) => d.message).join(', '), 400);
+            sendError(res, error.details.map((d) => d.message), 400);
             return;
         }
 
@@ -362,7 +362,7 @@ export async function obtenerPublicacionesInactivasUsuario(req: Request, res: Re
         });
 
         if (error) {
-            sendError(res, error.details.map((d) => d.message).join(', '), 400);
+            sendError(res, error.details.map((d) => d.message), 400);
             return;
         }
 

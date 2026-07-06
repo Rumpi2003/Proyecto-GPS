@@ -95,9 +95,11 @@ export default function CrearPublicacion() {
 
       navigate("/");
     } catch (err) {
-      const msg =
-        err?.response?.data?.message || err.message || "Error al crear la publicación";
-      setError(msg);
+      const data = err?.response?.data;
+      const msgs = Array.isArray(data?.message)
+        ? data.message
+        : [data?.message || err.message || "Error al crear la publicación"];
+      setError(msgs);
     } finally {
       setEnviando(false);
     }
@@ -242,7 +244,7 @@ export default function CrearPublicacion() {
                   className="flex-1 rounded-full px-6 py-3 font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50"
                   style={{
                     backgroundColor: "#FEE2E2",
-                    border: "2px solid #FEE2E2",
+                    border: "2px solid #991B1B",
                     color: "#991B1B",
                   }}
                 >
@@ -250,7 +252,16 @@ export default function CrearPublicacion() {
                 </button>
               </div>
 
-              {error && (
+              {error && Array.isArray(error) && error.length > 0 && (
+                <div className="space-y-2">
+                  {error.map((msg, i) => (
+                    <div key={i} className="bg-danger-low border border-danger/30 rounded-ustay-card p-4">
+                      <p className="text-sm text-danger font-medium">{msg}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {error && !Array.isArray(error) && (
                 <div className="bg-danger-low border border-danger/30 rounded-ustay-card p-4">
                   <p className="text-sm text-danger font-medium">{error}</p>
                 </div>

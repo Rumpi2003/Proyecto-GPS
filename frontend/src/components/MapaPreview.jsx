@@ -27,13 +27,20 @@ function extraerCoordenadas(coordenadas) {
   return null;
 }
 
+const MAX_DISTANCIA = 2000;
+
+function formatearDistancia(metros) {
+  if (metros < 1000) return `${metros} m`;
+  return `${(metros / 1000).toFixed(1).replace('.', ',')} km`;
+}
+
 export default function MapaPreview({ center, universidades }) {
   const universidadesCercanas = useMemo(() => {
     if (!center || !universidades?.length) return [];
 
-    return universidades.filter((u) => {
+    return universidades.reduce((acc, u) => {
       const uniCoord = extraerCoordenadas(u.coordenadas);
-      if (!uniCoord) return false;
+      if (!uniCoord) return acc;
 
       const R = 6371e3;
       const dLat = ((uniCoord.lat - center.lat) * Math.PI) / 180;
@@ -45,8 +52,11 @@ export default function MapaPreview({ center, universidades }) {
           Math.sin(dLng / 2) ** 2;
       const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-      return dist <= 2000;
-    });
+      if (dist <= MAX_DISTANCIA) {
+        acc.push({ ...u, distancia: Math.round(dist) });
+      }
+      return acc;
+    }, []);
   }, [center, universidades]);
 
   const universidadCercana = universidadesCercanas[0] ?? null;
@@ -74,14 +84,27 @@ export default function MapaPreview({ center, universidades }) {
   }
 
   return (
-    <div className="bg-white border border-[#B6D5FE] rounded-panel overflow-hidden h-[340px]">
+    <div className="bg-white border border-[#B6D5FE] rounded-panel overflow-hidden h-[340px] relative">
       <GoogleMap
         center={mapCenter}
-        nombreUniversidad={universidadCercana?.nombre_universidad ?? "Ubicación"}
+        nombreUniversidad={"Ubicación del arriendo"}
         publicaciones={publicacionesSimuladas}
         publicacionSeleccionada={null}
         onSelectPublicacion={() => {}}
       />
+
+      {universidadesCercanas.length > 0 && (
+        <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1.5 pointer-events-none">
+          {universidadesCercanas.map((u) => (
+            <span
+              key={u.id_universidad}
+              className="bg-white/90 backdrop-blur-sm text-[11px] font-semibold text-ustay-text px-2.5 py-1 rounded-full shadow-sm border border-[#B6D5FE] pointer-events-auto"
+            >
+              {u.nombre_universidad} · {formatearDistancia(u.distancia)}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

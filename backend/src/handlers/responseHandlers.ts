@@ -15,11 +15,11 @@ export function sendSuccess(
 
 export function sendError(
   res: Response,
-  message = 'Error interno del servidor',
+  message: string | string[] = 'Error interno del servidor',
   statusCode = 500,
 ): void {
   res.status(statusCode).json({
     status: 'error',
-    message,
+    message: Array.isArray(message) ? message : [message],
   });
 }
