@@ -29,6 +29,13 @@ export default function TarjetaPublicacion({
   const visibles = etiquetas.slice(0, 4);
   const extras = etiquetas.length - visibles.length;
 
+  function limitarTexto(texto, maxCaracteres = 60) {
+    const valor = String(texto ?? "");
+    return valor.length > maxCaracteres
+      ? `${valor.slice(0, maxCaracteres).trimEnd()}...`
+      : valor;
+  }
+
   return (
     <article
       onClick={onClick}
@@ -50,9 +57,9 @@ export default function TarjetaPublicacion({
 
         <div className="p-5 flex flex-col gap-3">
           <div className="flex items-start justify-between gap-4">
-            <h3 className="titulo text-[22px]">{publicacion.titulo}</h3>
+            <h3 className="titulo text-[22px] line-clamp-2-custom">{limitarTexto(publicacion.titulo, 30)}</h3>
             <div className="shrink-0 rounded-full bg-ustay-bg px-3 py-1 text-sm font-semibold text-ustay-blue">
-              {publicacion.promedio_valoracion ?? 0}/5
+              {publicacion.promedio_valoracion ?? 0}
             </div>
           </div>
 

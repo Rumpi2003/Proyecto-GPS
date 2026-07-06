@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { BarraNavegacion } from "../components/BarraNavegacion.jsx";
 import { BarraInferior } from "../components/BarraInferior.jsx";
@@ -72,6 +72,37 @@ export default function Map() {
   const [cargando, setCargando] = useState(true);
   const [cargandoPublicaciones, setCargandoPublicaciones] = useState(false);
   const [error, setError] = useState("");
+  const listaPublicacionesRef = useRef(null);
+  const [ordenPublicaciones, setOrdenPublicaciones] = useState("distancia-asc");
+
+  function obtenerDistancia(publicacion, universidadId) {
+    const cercania = publicacion.cercanias?.find(
+      (c) => String(c.id_universidad) === String(universidadId)
+    );
+
+    return cercania?.distancia_metros ?? null;
+  }
+
+  const publicacionesOrdenadas = useMemo(() => {
+    const copia = [...publicaciones];
+
+    const valorParaDistancia = (publicacion) =>
+      obtenerDistancia(publicacion, universidadSeleccionada?.id_universidad) ?? Number.POSITIVE_INFINITY;
+
+    const valorParaPrecio = (publicacion) => Number(publicacion.precio ?? 0);
+    const valorParaValoracion = (publicacion) => Number(publicacion.promedio_valoracion ?? 0);
+
+    const comparadores = {
+      "distancia-asc": (a, b) => valorParaDistancia(a) - valorParaDistancia(b),
+      "distancia-desc": (a, b) => valorParaDistancia(b) - valorParaDistancia(a),
+      "precio-asc": (a, b) => valorParaPrecio(a) - valorParaPrecio(b),
+      "precio-desc": (a, b) => valorParaPrecio(b) - valorParaPrecio(a),
+      "valoracion-asc": (a, b) => valorParaValoracion(a) - valorParaValoracion(b),
+      "valoracion-desc": (a, b) => valorParaValoracion(b) - valorParaValoracion(a),
+    };
+
+    return copia.sort(comparadores[ordenPublicaciones] ?? comparadores["distancia-asc"]);
+  }, [publicaciones, ordenPublicaciones, universidadSeleccionada]);
 
   const filtrosIniciales = {
     distancia_max: 2000,
@@ -157,6 +188,36 @@ export default function Map() {
     setUniversidadSeleccionada(uni ?? null);
   }
 
+  useEffect(() => {
+    const idSeleccionada = publicacionSeleccionada?.id_publicacion;
+    if (!idSeleccionada) return;
+
+    const contenedor = listaPublicacionesRef.current;
+    if (!contenedor) return;
+
+    const item = contenedor.querySelector(
+      `[data-publicacion-id="${idSeleccionada}"]`
+    );
+    if (!item) return;
+
+    const contRect = contenedor.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+
+    const fueraDeVista =
+      itemRect.top < contRect.top || itemRect.bottom > contRect.bottom;
+
+    if (fueraDeVista) {
+      const offset =
+        item.offsetTop - contenedor.offsetTop - contenedor.clientHeight / 2 +
+        item.clientHeight / 2;
+
+      contenedor.scrollTo({
+        top: Math.max(0, offset),
+        behavior: "smooth",
+      });
+    }
+  }, [publicacionSeleccionada]);
+
   if (cargando) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -207,12 +268,12 @@ export default function Map() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       <BarraNavegacion />
 
-      <main className="flex-grow max-w-[1600px] mx-auto w-full px-6 py-6 pb-28">
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_640px] gap-6 items-start">
-          <aside className="bg-white rounded-panel shadow-soft border border-slate-100 p-5 sticky top-6 max-h-[calc(100vh-11rem)] overflow-y-auto">
+      <main className="h-[calc(100vh-7.5rem)] max-w-[1600px] mx-auto w-full px-6 py-4 overflow-hidden">
+        <div className="grid h-full grid-cols-1 lg:grid-cols-[300px_1fr_640px] gap-6 items-stretch">
+          <aside className="bg-white rounded-panel shadow-soft border border-slate-100 p-5 sticky top-6 h-full overflow-y-auto">
             <FiltrosPublicacion
               universidades={universidades}
               universidadSeleccionada={universidadSeleccionada}
@@ -228,22 +289,34 @@ export default function Map() {
             />
           </aside>
 
-          <section className="pr-1">
-            <div className="space-y-4">
+          <section className="pr-1 min-h-0 h-full">
+            <div className="mb-4 flex items-center justify-end">
+              <select
+                value={ordenPublicaciones}
+                onChange={(e) => setOrdenPublicaciones(e.target.value)}
+                className="rounded-ustay-card border border-slate-200 bg-white px-3 py-2 text-sm"
+              >
+                <option value="distancia-asc">Distancia: menor a mayor</option>
+                <option value="distancia-desc">Distancia: mayor a menor</option>
+                <option value="precio-asc">Precio: menor a mayor</option>
+                <option value="precio-desc">Precio: mayor a menor</option>
+                <option value="valoracion-asc">Valoración: menor a mayor</option>
+                <option value="valoracion-desc">Valoración: mayor a menor</option>
+              </select>
+            </div>
+            <div ref={listaPublicacionesRef} className="space-y-4 h-full overflow-y-auto pr-2 overscroll-contain pb-28">
               {cargandoPublicaciones ? (
                 <div className="texto">Cargando publicaciones...</div>
               ) : publicaciones.length > 0 ? (
-                publicaciones.map((publicacion) => (
-                  <TarjetaPublicacion
-                    key={publicacion.id_publicacion}
-                    publicacion={publicacion}
-                    universidadId={universidadSeleccionada.id_universidad}
-                    activa={
-                      publicacionSeleccionada?.id_publicacion ===
-                      publicacion.id_publicacion
-                    }
-                    onClick={() => seleccionarPublicacion(publicacion.id_publicacion)}
-                  />
+                publicacionesOrdenadas.map((publicacion) => (
+                  <div key={publicacion.id_publicacion} data-publicacion-id={publicacion.id_publicacion}>
+                     <TarjetaPublicacion 
+                       publicacion={publicacion}
+                       universidadId={universidadSeleccionada.id_universidad}
+                       activa={ publicacionSeleccionada?.id_publicacion === publicacion.id_publicacion }
+                       onClick={() => seleccionarPublicacion(publicacion.id_publicacion)}
+                     />
+                   </div>
                 ))
               ) : (
                 <div className="bg-white rounded-panel shadow-soft border border-slate-100 p-6 texto">

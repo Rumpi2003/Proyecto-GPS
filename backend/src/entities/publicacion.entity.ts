@@ -48,7 +48,7 @@ export class Publicacion {
 	@Column({ type: 'boolean', default: false })
 	permitir_comentarios!: boolean;
 
-	@Column({ type: 'enum', enum: Estado, default: Estado.ACTIVA })
+	@Column({ type: 'enum', enum: Estado, default: Estado.PENDIENTE })
 	estado!: Estado;
 
 	@Column({ type: 'varchar', length: 255 })

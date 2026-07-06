@@ -77,7 +77,6 @@ export default function FiltrosPublicacion({
           value={universidadSeleccionada?.id_universidad ?? ""}
           onChange={(e) => onChangeUniversidad(e.target.value)}
         >
-          <option value="">Selecciona una universidad</option>
           {universidades.map((uni) => (
             <option key={uni.id_universidad} value={uni.id_universidad}>
               {uni.nombre_universidad}
