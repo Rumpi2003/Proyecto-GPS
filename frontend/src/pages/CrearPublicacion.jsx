@@ -60,6 +60,11 @@ export default function CrearPublicacion() {
     setForm((prev) => ({ ...prev, [campo]: valor }));
   }
 
+  function handleTelefonoChange(e) {
+    const filtrado = e.target.value.replace(/[^+\d\s]/g, "");
+    actualizar("telefono", filtrado);
+  }
+
   function handlePlaceSelect({ place_id, direccion: dir, lat, lng }) {
     setDireccion({ place_id, direccion: dir, lat, lng });
   }
@@ -180,7 +185,7 @@ export default function CrearPublicacion() {
                   label="Teléfono de contacto"
                   type="tel"
                   value={form.telefono}
-                  onChange={(e) => actualizar("telefono", e.target.value)}
+                  onChange={handleTelefonoChange}
                   placeholder="+56 9 1234 5678"
                   required
                 />

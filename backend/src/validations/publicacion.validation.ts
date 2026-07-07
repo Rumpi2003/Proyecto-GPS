@@ -24,11 +24,12 @@ export const createPublicacionSchema = Joi.object({
     'number.min': 'El precio debe tener al menos 5 dígitos (mínimo $10.000)',
     'any.required': 'El precio es obligatorio',
   }),
-  telefono: Joi.string().trim().min(8).max(20).required().messages({
+  telefono: Joi.string().trim().min(8).max(20).pattern(/^\+?\d+(?: \d+)*$/).required().messages({
     'string.empty': 'El teléfono es obligatorio',
     'any.required': 'El teléfono es obligatorio',
     'string.min': 'El teléfono debe tener al menos 8 caracteres',
     'string.max': 'El teléfono no puede tener más de 20 caracteres',
+    'string.pattern.base': 'El teléfono no es válido. Ejemplo esperado: +56 9 1234 5678',
   }),
   permitir_comentarios: Joi.boolean().default(false),
   etiquetas: Joi.array().items(Joi.number().integer().positive()).default([]),
@@ -48,9 +49,10 @@ export const updatePublicacionSchema = Joi.object({
     'number.integer': 'El precio debe ser un número entero',
     'number.min': 'El precio debe tener al menos 5 dígitos (mínimo $10.000)',
   }),
-  telefono: Joi.string().trim().min(8).max(20).messages({
+  telefono: Joi.string().trim().min(8).max(20).pattern(/^\+?\d+(?: \d+)*$/).messages({
     'string.min': 'El teléfono debe tener al menos 8 caracteres',
     'string.max': 'El teléfono no puede tener más de 20 caracteres',
+    'string.pattern.base': 'El teléfono no es válido. Ejemplo esperado: +56 9 1234 5678',
   }),
   permitir_comentarios: Joi.boolean(),
   estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA, Estado.ELIMINADA),
