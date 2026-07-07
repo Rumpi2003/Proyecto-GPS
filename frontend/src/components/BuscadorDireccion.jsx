@@ -241,7 +241,7 @@ export default function BuscadorDireccion({ onPlaceSelect }) {
 
   return (
     <div className="space-y-1.5">
-      <label className="subtitulo text-sm block">
+      <label className="subtitulo text-texto block">
         Dirección <span className="text-danger ml-0.5">*</span>
       </label>
 

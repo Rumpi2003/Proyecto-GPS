@@ -105,11 +105,11 @@ export default function SubirFotos({
 
   return (
     <div className="space-y-4">
-      <h3 className="subtitulo text-sm">Fotos</h3>
+      <h3 className="subtitulo text-texto">Fotos</h3>
 
       {/* Portada */}
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-ustay-muted font-poppins">
+        <label className="subtitulo text-texto">
           Portada *
         </label>
         <input
@@ -131,7 +131,7 @@ export default function SubirFotos({
 
       {/* Fotos adicionales */}
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-ustay-muted font-poppins">
+        <label className="subtitulo text-texto">
           Fotos adicionales {fotos.length > 0 && `(${fotos.length}/${MAX_FOTOS})`}
         </label>
 

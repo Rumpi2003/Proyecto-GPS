@@ -71,7 +71,7 @@ export function uploadPublicacion(req: Request, res: Response, next: NextFunctio
       return;
     }
 
-    // Compresión asíncrona — no bloqueamos la respuesta
+    // Compresión — no bloqueamos la respuesta
     const todas = [portadaFile, ...fotosFiles].filter(Boolean);
     Promise.all(todas.map((f) => compressImage(f.path))).catch((e) => {
       console.error('Error comprimiendo imágenes:', e);

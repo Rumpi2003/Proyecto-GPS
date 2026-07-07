@@ -15,7 +15,7 @@ export default function InputField({
   return (
     <div className={`space-y-1.5 ${className}`}>
       {label && (
-        <label className="subtitulo text-sm block">
+        <label className="subtitulo text-texto block">
           {label}
           {required && <span className="text-danger ml-0.5">*</span>}
         </label>

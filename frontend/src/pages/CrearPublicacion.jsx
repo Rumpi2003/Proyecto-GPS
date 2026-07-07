@@ -201,7 +201,7 @@ export default function CrearPublicacion() {
               />
 
               <div className="flex items-center gap-3">
-                <label className="subtitulo text-sm">Permitir comentarios</label>
+                <label className="subtitulo text-texto">Permitir comentarios</label>
                 <button
                   type="button"
                   onClick={() =>

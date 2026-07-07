@@ -58,7 +58,7 @@ export default function SelectorEtiquetas({
 
   return (
     <div className="space-y-4">
-      <h3 className="subtitulo text-sm">Etiquetas</h3>
+      <h3 className="subtitulo text-texto">Etiquetas</h3>
 
       {categorias.length === 0 && (
         <p className="text-xs text-ustay-muted">Cargando etiquetas...</p>
@@ -68,7 +68,7 @@ export default function SelectorEtiquetas({
         {categorias.map((categoria) => (
           <div key={categoria.id_categoria}>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-ustay-text font-poppins">
+              <span className="subtitulo text-texto">
                 {categoria.nombre_categoria}
               </span>
               {categoria.es_excluyente && (
