@@ -4,12 +4,7 @@ import * as usuarioService from '../services/usuario.service.js';
 import { encriptarContraseña, compararContraseña, generarToken } from '../services/auth.service.js';
 import { sendSuccess, sendError } from '../handlers/responseHandlers.js';
 import { Rol } from '../entities/usuario.entity.js';
-
-const registerSchema = Joi.object({
-  correo: Joi.string().email().required(),
-  contraseña: Joi.string().min(6).max(255).required(),
-  nombre: Joi.string().min(2).max(255).required(),
-});
+import { createUsuarioSchema } from '../validations/usuario.validation.js';
 
 const loginSchema = Joi.object({
   correo: Joi.string().email().required(),
@@ -18,7 +13,7 @@ const loginSchema = Joi.object({
 
 export async function registrarUsuario(req: Request, res: Response): Promise<void> {
   try {
-    const { error, value } = registerSchema.validate(req.body, { abortEarly: false });
+    const { error, value } = createUsuarioSchema.validate(req.body, { abortEarly: false });
     if (error) {
       sendError(res, error.details.map((d: { message: string }) => d.message).join(', '), 400);
       return;
