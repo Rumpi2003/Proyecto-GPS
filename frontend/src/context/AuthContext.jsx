@@ -58,21 +58,30 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const updateToken = useCallback((token) => {
+    Cookies.set("jwt-auth", token, { expires: 1, path: "/" });
+    const decoded = decodeJwt(token);
+    if (decoded) {
+      setUser({ id: decoded.id, rol: decoded.rol });
+    }
+  }, []);
+
   const isAuthenticated = !!user;
   const role = user?.rol ?? null;
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated,
-        role,
-        isLoading,
-        login,
-        register,
-        logout,
-      }}
-    >
+      <AuthContext.Provider
+        value={{
+          user,
+          isAuthenticated,
+          role,
+          isLoading,
+          login,
+          register,
+          logout,
+          updateToken,
+        }}
+      >
       {children}
     </AuthContext.Provider>
   );

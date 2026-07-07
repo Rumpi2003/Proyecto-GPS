@@ -3,9 +3,11 @@ import { sendSuccess, sendError } from "../handlers/responseHandlers.js";
 import { PublicacionService } from "../services/publicacion.service.js";
 import { distanciaMinima } from "../middleware/distanciaMinima.middleware.js";
 import { direccionExiste } from "../middleware/direccionExistente.middleware.js";
-import { Usuario } from "../entities/usuario.entity.js";
+import { Usuario, Rol } from "../entities/usuario.entity.js";
 import { EtiquetaService } from "../services/etiqueta.service.js";
 import { type Publicacion } from "../entities/publicacion.entity.js";
+import { generarToken } from "../services/auth.service.js";
+import { actualizar, obtenerPorId } from "../services/usuario.service.js";
 import {
     createPublicacionSchema,
     updatePublicacionSchema,
@@ -102,8 +104,17 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
                 Math.round(item.distancia_metros),
             );
         }
+
+        // Si el usuario es "registrado", pasarlo a "publicante"
+        const usuarioDb = await obtenerPorId(publicante.id_usuario);
+        let nuevoToken: string | undefined;
+
+        if (usuarioDb && usuarioDb.rol === Rol.REGISTRADO) {
+            await actualizar(publicante.id_usuario, { rol: Rol.PUBLICANTE });
+            nuevoToken = generarToken({ id: publicante.id_usuario, rol: Rol.PUBLICANTE });
+        }
         
-        sendSuccess(res, { publicacion: nueva, resultados }, 'publicacion creada', 201);
+        sendSuccess(res, { publicacion: nueva, resultados, token: nuevoToken }, 'publicacion creada', 201);
     } catch (err) {
         sendError(res, 'Error al crear publicación', 500);
     }

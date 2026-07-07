@@ -15,7 +15,7 @@ import { Wrapper } from "@googlemaps/react-wrapper";
 
 export default function CrearPublicacion() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, updateToken } = useAuth();
 
   const [etiquetas, setEtiquetas] = useState([]);
   const [universidades, setUniversidades] = useState([]);
@@ -81,7 +81,7 @@ export default function CrearPublicacion() {
     setEnviando(true);
 
     try {
-      await createPublicacion({
+      const resultado = await createPublicacion({
         place_id: direccion.place_id,
         titulo: form.titulo.trim(),
         descripcion: form.descripcion.trim(),
@@ -92,6 +92,11 @@ export default function CrearPublicacion() {
         url_fotos: form.fotos.filter((f) => f.trim()),
         etiquetas: form.etiquetas,
       });
+
+      // Actualizar el token con el nuevo rol (publicante)
+      if (resultado?.token) {
+        updateToken(resultado.token);
+      }
 
       navigate("/");
     } catch (err) {

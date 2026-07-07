@@ -18,16 +18,16 @@ export const createPublicacionSchema = Joi.object({
     'string.min': 'La descripción debe tener al menos 10 caracteres',
     'string.max': 'La descripción no puede tener más de 255 caracteres',
   }),
-  precio: Joi.number().integer().min(0).required().messages({
+  precio: Joi.number().integer().min(10000).required().messages({
     'number.base': 'El precio debe ser un número',
     'number.integer': 'El precio debe ser un número entero',
-    'number.min': 'El precio no puede ser negativo',
+    'number.min': 'El precio debe tener al menos 5 dígitos (mínimo $10.000)',
     'any.required': 'El precio es obligatorio',
   }),
-  telefono: Joi.string().trim().min(7).max(20).required().messages({
+  telefono: Joi.string().trim().min(8).max(20).required().messages({
     'string.empty': 'El teléfono es obligatorio',
     'any.required': 'El teléfono es obligatorio',
-    'string.min': 'El teléfono debe tener al menos 7 caracteres',
+    'string.min': 'El teléfono debe tener al menos 8 caracteres',
     'string.max': 'El teléfono no puede tener más de 20 caracteres',
   }),
   permitir_comentarios: Joi.boolean().default(false),
@@ -51,13 +51,13 @@ export const updatePublicacionSchema = Joi.object({
     'string.min': 'La descripción debe tener al menos 10 caracteres',
     'string.max': 'La descripción no puede tener más de 255 caracteres',
   }),
-  precio: Joi.number().integer().min(0).messages({
+  precio: Joi.number().integer().min(10000).messages({
     'number.base': 'El precio debe ser un número',
     'number.integer': 'El precio debe ser un número entero',
-    'number.min': 'El precio no puede ser negativo',
+    'number.min': 'El precio debe tener al menos 5 dígitos (mínimo $10.000)',
   }),
-  telefono: Joi.string().trim().min(7).max(20).messages({
-    'string.min': 'El teléfono debe tener al menos 7 caracteres',
+  telefono: Joi.string().trim().min(8).max(20).messages({
+    'string.min': 'El teléfono debe tener al menos 8 caracteres',
     'string.max': 'El teléfono no puede tener más de 20 caracteres',
   }),
   permitir_comentarios: Joi.boolean(),
