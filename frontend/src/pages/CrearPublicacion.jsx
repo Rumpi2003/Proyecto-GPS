@@ -28,8 +28,8 @@ export default function CrearPublicacion() {
     precio: "",
     telefono: "",
     permitir_comentarios: true,
-    portada: "",
-    fotos: [],
+    portada: null,        // File | null
+    fotos: [],            // File[]
     etiquetas: [],
   });
 
@@ -73,25 +73,26 @@ export default function CrearPublicacion() {
       return;
     }
 
-    if (!form.portada.trim()) {
-      setError("Agregá una URL de foto de portada");
+    if (!form.portada) {
+      setError("Seleccioná una foto de portada");
       return;
     }
 
     setEnviando(true);
 
     try {
-      const resultado = await createPublicacion({
-        place_id: direccion.place_id,
-        titulo: form.titulo.trim(),
-        descripcion: form.descripcion.trim(),
-        precio: Number(form.precio),
-        telefono: form.telefono.trim(),
-        permitir_comentarios: form.permitir_comentarios,
-        url_portada: form.portada.trim(),
-        url_fotos: form.fotos.filter((f) => f.trim()),
-        etiquetas: form.etiquetas,
-      });
+      const formData = new FormData();
+      formData.append("place_id", direccion.place_id);
+      formData.append("titulo", form.titulo.trim());
+      formData.append("descripcion", form.descripcion.trim());
+      formData.append("precio", String(Number(form.precio)));
+      formData.append("telefono", form.telefono.trim());
+      formData.append("permitir_comentarios", String(form.permitir_comentarios));
+      formData.append("portada", form.portada);
+      form.fotos.forEach((foto) => formData.append("fotos", foto));
+      formData.append("etiquetas", JSON.stringify(form.etiquetas));
+
+      const resultado = await createPublicacion(formData);
 
       // Actualizar el token con el nuevo rol (publicante)
       if (resultado?.token) {
@@ -162,7 +163,7 @@ export default function CrearPublicacion() {
               <SubirFotos
                 portada={form.portada}
                 fotos={form.fotos}
-                onChangePortada={(url) => actualizar("portada", url)}
+                onChangePortada={(file) => actualizar("portada", file)}
                 onChangeFotos={(fotos) => actualizar("fotos", fotos)}
               />
 

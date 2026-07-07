@@ -5,7 +5,9 @@ export async function getPublicacionesFiltradas(params) {
     return res.data.data;
 }
 
-export async function createPublicacion(data) {
-    const res = await api.post('/publicaciones', data);
+export async function createPublicacion(formData) {
+    const res = await api.post('/publicaciones', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return res.data.data;
 }

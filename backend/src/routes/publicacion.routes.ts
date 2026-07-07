@@ -11,11 +11,12 @@ import {
 import { authenticate } from '../middleware/auth.middleware.js';
 import { esRegistradoPublicante } from '../middleware/esRegistradoPublicante.js';
 import { esDueñoPublicacion } from '../middleware/esDueñoPublicación.middleware.js';
+import { uploadPublicacion } from '../middleware/uploadImagen.middleware.js';
 
 const router = Router();
 
-router.post('/', authenticate, esRegistradoPublicante, crearPublicacion);
-router.put('/:id_publicacion', authenticate, esDueñoPublicacion, actualizarPublicacion);
+router.post('/', authenticate, esRegistradoPublicante, uploadPublicacion, crearPublicacion);
+router.put('/:id_publicacion', authenticate, esDueñoPublicacion, uploadPublicacion, actualizarPublicacion);
 router.delete('/:id_publicacion', authenticate, esDueñoPublicacion, eliminarPublicacion);
 router.get('/filtros', obtenerPublicacionesPorFiltros);
 router.get('/usuario/:id_usuario', authenticate, esRegistradoPublicante, obtenerPublicacionesUsuario);

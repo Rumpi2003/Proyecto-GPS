@@ -8,6 +8,7 @@ import { EtiquetaService } from "../services/etiqueta.service.js";
 import { type Publicacion } from "../entities/publicacion.entity.js";
 import { generarToken } from "../services/auth.service.js";
 import { actualizar, obtenerPorId } from "../services/usuario.service.js";
+import { eliminarArchivosSubidos } from '../middleware/uploadImagen.middleware.js';
 import {
     createPublicacionSchema,
     updatePublicacionSchema,
@@ -19,19 +20,54 @@ import {
 const publicacionService = new PublicacionService();
 const etiquetaService = new EtiquetaService();
 
+/** Convierte JSON strings de multipart a valores reales */
+function parseMultipartBody(body: Record<string, unknown>) {
+    const camposJson = ['etiquetas', 'eliminar_fotos', 'eliminar_etiquetas', 'nuevas_etiquetas'];
+
+    for (const campo of camposJson) {
+        if (typeof body[campo] === 'string') {
+            try {
+                body[campo] = JSON.parse(body[campo] as string);
+            } catch {
+                // Si no es JSON válido, lo dejamos como viene
+            }
+        }
+    }
+
+    // Booleans vienen como string en multipart
+    if (typeof body.permitir_comentarios === 'string') {
+        body.permitir_comentarios = body.permitir_comentarios === 'true';
+    }
+}
+
+function getFiles(req: Request) {
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+    return {
+        portada: files?.['portada']?.[0],
+        fotos: files?.['fotos'] ?? [],
+    };
+}
+
 export async function crearPublicacion(req: Request, res: Response): Promise<void> {
+    /** Indica si los archivos subidos ya fueron asignados a la publicación.
+     *  Si es false al salir (error), hay que limpiarlos del disco. */
+    let filesOwned = false;
+
     try {
+        parseMultipartBody(req.body);
+
         const { error, value } = createPublicacionSchema.validate(req.body, {
             abortEarly: false,
             stripUnknown: true
         });
 
         if (error) {
+            eliminarArchivosSubidos(req);
             sendError(res, error.details.map((d) => d.message), 400);
             return;
         }
 
-        const { place_id, titulo, descripcion, precio, telefono, permitir_comentarios, url_fotos = [], url_portada, etiquetas = [] } = value;
+        const { place_id, titulo, descripcion, precio, telefono, permitir_comentarios, etiquetas = [] } = value;
 
         await etiquetaService.validarEtiquetasNoExcluyentes(etiquetas);
 
@@ -39,6 +75,7 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
         const resultados = await distanciaMinima(place_id);
 
         if (!resultados || resultados.length === 0) {
+            eliminarArchivosSubidos(req);
             sendError(res, 'la publicación debe estar a máximo 2000 metros de una universidad', 400);
             return;
         }
@@ -46,6 +83,7 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
         const direccion = resultados[0]?.direccion
 
         if (!direccion) {
+            eliminarArchivosSubidos(req);
             sendError(res, 'No se pudo obtener la dirección', 500);
             return;
         }
@@ -53,6 +91,7 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
         const existe = await direccionExiste(direccion);
 
         if (existe) {
+            eliminarArchivosSubidos(req);
             sendError(res, 'Ya existe una publicación con esa dirección', 400);
             return;
         }
@@ -60,6 +99,7 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
         const coordenadas = resultados[0]?.coordenadas;
 
         if (!coordenadas) {
+            eliminarArchivosSubidos(req);
             sendError(res, 'No se pudieron obtener las coordenadas de la dirección', 500);
             return;
         }
@@ -79,15 +119,17 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
             permitir_comentarios,
         });
 
-        // Añade las Fotos
-        for (const fotoUrl of url_fotos) {
-            if (typeof fotoUrl === 'string' && fotoUrl.trim()) {
-                await publicacionService.addFoto(nueva.id_publicacion, fotoUrl, false);
-            }
+        filesOwned = true;
+
+        // Archivos subidos
+        const { portada, fotos } = getFiles(req);
+
+        // La portada ya fue validada por uploadImagen.middleware
+        await publicacionService.addFoto(nueva.id_publicacion, `/uploads/${portada!.filename}`, true);
+
+        for (const foto of fotos) {
+            await publicacionService.addFoto(nueva.id_publicacion, `/uploads/${foto.filename}`, false);
         }
-        
-        // Añade la Portada
-        await publicacionService.addFoto(nueva.id_publicacion, url_portada, true);
 
         // Añade las Etiquetas
         for (const idEtiqueta of etiquetas) {
@@ -116,13 +158,20 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
         
         sendSuccess(res, { publicacion: nueva, resultados, token: nuevoToken }, 'publicacion creada', 201);
     } catch (err) {
+        if (!filesOwned) eliminarArchivosSubidos(req);
         sendError(res, 'Error al crear publicación', 500);
     }
 }
 
 export async function actualizarPublicacion(req: Request, res: Response): Promise<void> {
+    /** Indica si los archivos subidos ya se enlazaron a la publicación (addFoto).
+     *  Si es false al salir por error, hay que limpiarlos del disco. */
+    let filesOwned = false;
+
     try {
-        const { error: paramsError, value: paramsValue } =idPublicacionParamSchema.validate(req.params, {
+        parseMultipartBody(req.body);
+
+        const { error: paramsError, value: paramsValue } = idPublicacionParamSchema.validate(req.params, {
             abortEarly: false,
             stripUnknown: true
         });
@@ -133,11 +182,13 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
         });
 
         if (paramsError) {
+            eliminarArchivosSubidos(req);
             sendError(res, paramsError.details.map((d) => d.message), 400);
             return;
         }
 
         if (bodyError) {
+            eliminarArchivosSubidos(req);
             sendError(res, bodyError.details.map((d) => d.message), 400);
             return;
         }
@@ -152,7 +203,6 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
             permitir_comentarios,
             estado,
             eliminar_fotos = [],
-            nuevas_fotos = [],
             eliminar_etiquetas = [],
             nuevas_etiquetas = [],
         } = bodyValue;
@@ -160,6 +210,7 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
         const id = Number(id_publicacion);
 
         if (Number.isNaN(id)) {
+            eliminarArchivosSubidos(req);
             sendError(res, 'id_publicación inválido', 400);
             return;
         }
@@ -167,6 +218,7 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
         const publicacion = await publicacionService.findOne(id);
 
         if (!publicacion) {
+            eliminarArchivosSubidos(req);
             sendError(res, 'Publicación no encontrada', 404);
             return;
         }
@@ -185,18 +237,31 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
             await publicacionService.update(id, datosActualizados);
         }
 
-        // Eliminar fotos
+        // Eliminar fotos (borra archivo físico también)
         for (const idFoto of eliminar_fotos) {
             if (typeof idFoto === 'number') {
                 await publicacionService.removeFoto(idFoto);
             }
         }
 
-        // Añadir nuevas fotos
-        for (const fotoUrl of nuevas_fotos) {
-            if (typeof fotoUrl === 'string' && fotoUrl.trim()) {
-                await publicacionService.addFoto(id, fotoUrl, false);
+        // Archivos subidos
+        const { portada: nuevaPortada, fotos: nuevasFotos } = getFiles(req);
+
+        // Si subieron una portada nueva, reemplazar la anterior
+        if (nuevaPortada) {
+            // Remover la portada anterior (si existe)
+            const viejaPortada = publicacion.fotos?.find((f) => f.es_portada);
+            if (viejaPortada) {
+                await publicacionService.removeFoto(viejaPortada.id_foto);
             }
+            await publicacionService.addFoto(id, `/uploads/${nuevaPortada.filename}`, true);
+            filesOwned = true;
+        }
+
+        // Añadir nuevas fotos
+        for (const foto of nuevasFotos) {
+            await publicacionService.addFoto(id, `/uploads/${foto.filename}`, false);
+            filesOwned = true;
         }
 
         const idsActuales = (publicacion.etiquetas ?? []).map((e) => e.id_etiqueta);
@@ -228,6 +293,7 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
 
         sendSuccess(res, publicacionActualizada, 'Publicación actualizada', 200);
     } catch (err) {
+        if (!filesOwned) eliminarArchivosSubidos(req);
         sendError(res, 'Error al actualizar publicación', 500);
     }
 }
@@ -250,6 +316,7 @@ export async function eliminarPublicacion(req: Request, res: Response): Promise<
             return;
         }
 
+        // Eliminar publicación (el service ya borra las fotos físicas)
         await publicacionService.delete(id);
         sendSuccess(res, null, 'Publicación eliminada', 200);
     } catch (err) {

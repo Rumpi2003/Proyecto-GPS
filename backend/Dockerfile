@@ -15,6 +15,9 @@ COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/dist ./dist
 COPY --from=base /app/src ./src
 
+# Carpeta para imágenes subidas
+RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
+
 ENV NODE_ENV=production
 EXPOSE 5000
 

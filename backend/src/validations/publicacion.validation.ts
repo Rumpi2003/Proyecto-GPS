@@ -31,14 +31,6 @@ export const createPublicacionSchema = Joi.object({
     'string.max': 'El teléfono no puede tener más de 20 caracteres',
   }),
   permitir_comentarios: Joi.boolean().default(false),
-  url_fotos: Joi.array().items(Joi.string().uri().messages({
-    'string.uri': 'Cada foto debe ser una URL válida',
-  })).default([]),
-  url_portada: Joi.string().uri().required().messages({
-    'string.empty': 'La foto de portada es obligatoria',
-    'any.required': 'La foto de portada es obligatoria',
-    'string.uri': 'La foto de portada debe ser una URL válida',
-  }),
   etiquetas: Joi.array().items(Joi.number().integer().positive()).default([]),
 });
 
@@ -63,9 +55,6 @@ export const updatePublicacionSchema = Joi.object({
   permitir_comentarios: Joi.boolean(),
   estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA, Estado.ELIMINADA),
   eliminar_fotos: Joi.array().items(Joi.number().integer().positive()).default([]),
-  nuevas_fotos: Joi.array().items(Joi.string().uri().messages({
-    'string.uri': 'Cada foto debe ser una URL válida',
-  })).default([]),
   eliminar_etiquetas: Joi.array().items(Joi.number().integer().positive()).default([]),
   nuevas_etiquetas: Joi.array().items(Joi.number().integer().positive()).default([]),
 }).min(1);

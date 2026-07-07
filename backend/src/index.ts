@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import routerApi from './routes/index.routes.js';
 import { AppDataSource } from './config/db.config.js';
 import { UniversidadService } from './services/universidad.service.js';
@@ -17,6 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 dotenv.config({ path: resolve(__dirname, '../../.env') });
+dotenv.config({ path: resolve(__dirname, '../../.env.local'), override: true });
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 5000;
@@ -44,6 +46,13 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(cookieParser());
+
+// Crear carpeta uploads si no existe y servir archivos estáticos
+const uploadsDir = resolve(__dirname, '../uploads');
+if (!existsSync(uploadsDir)) {
+  mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
 
 routerApi(app);
 
