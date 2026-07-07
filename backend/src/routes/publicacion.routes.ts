@@ -7,6 +7,7 @@ import {
     obtenerPublicacionesUsuario,
     obtenerPublicacionesActivasUsuario,
     obtenerPublicacionesInactivasUsuario,
+    obtenerPublicacionPorId
  } from '../controllers/publicacion.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { esRegistradoPublicante } from '../middleware/esRegistradoPublicante.js';
@@ -21,5 +22,5 @@ router.get('/filtros', obtenerPublicacionesPorFiltros);
 router.get('/usuario/:id_usuario', authenticate, esRegistradoPublicante, obtenerPublicacionesUsuario);
 router.get('/usuario/:id_usuario/activas', authenticate, esRegistradoPublicante, obtenerPublicacionesActivasUsuario);
 router.get('/usuario/:id_usuario/inactivas', authenticate, esRegistradoPublicante, obtenerPublicacionesInactivasUsuario);
-
+router.get('/:id_publicacion', obtenerPublicacionPorId);
 export default router;

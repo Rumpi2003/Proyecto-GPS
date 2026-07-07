@@ -112,6 +112,12 @@ function Mapa({
       position: center,
       map: mapa,
       title: nombreUniversidad,
+      label: {
+        text: nombreUniversidad,
+        color: "#14532d",
+        fontWeight: "700",
+        fontSize: "12px",
+      },
       icon: {
         path: window.google.maps.SymbolPath.CIRCLE,
         scale: 10,
@@ -119,6 +125,7 @@ function Mapa({
         fillOpacity: 1,
         strokeColor: "#ffffff",
         strokeWeight: 2,
+        labelOrigin: new window.google.maps.Point(0, -2),
       },
       zIndex: 2000,
     });

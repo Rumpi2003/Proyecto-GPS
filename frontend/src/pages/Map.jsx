@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BarraNavegacion } from "../components/BarraNavegacion.jsx";
 import { BarraInferior } from "../components/BarraInferior.jsx";
 import { TarjetaUniversidad } from "../components/TarjetaUniversidad.jsx";
@@ -62,6 +62,7 @@ function normalizarCoordenadas(coordenadas) {
 
 export default function Map() {
   const location = useLocation();
+  const navigate = useNavigate();
   const idInicial = location.state?.universidadId;
 
   const [universidades, setUniversidades] = useState([]);
@@ -74,6 +75,11 @@ export default function Map() {
   const [error, setError] = useState("");
   const listaPublicacionesRef = useRef(null);
   const [ordenPublicaciones, setOrdenPublicaciones] = useState("distancia-asc");
+
+
+  function irAPublicacion(idPublicacion) {
+    navigate(`/publicacion/${idPublicacion}`);
+  }
 
   function obtenerDistancia(publicacion, universidadId) {
     const cercania = publicacion.cercanias?.find(
@@ -309,7 +315,7 @@ export default function Map() {
                 <div className="texto">Cargando publicaciones...</div>
               ) : publicaciones.length > 0 ? (
                 publicacionesOrdenadas.map((publicacion) => (
-                  <div key={publicacion.id_publicacion} data-publicacion-id={publicacion.id_publicacion}>
+                  <div key={publicacion.id_publicacion} data-publicacion-id={publicacion.id_publicacion} onDoubleClick={() => irAPublicacion(publicacion.id_publicacion)}>
                      <TarjetaPublicacion 
                        publicacion={publicacion}
                        universidadId={universidadSeleccionada.id_universidad}

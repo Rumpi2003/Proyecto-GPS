@@ -13,6 +13,10 @@ export class ComentarioService {
       throw new Error('NOT_FOUND: La publicación no existe');
     }
 
+    if (publicacion.publicante?.id_usuario === id_usuario) {
+      throw new Error('BAD_REQUEST: No puedes comentar tu propia publicación');
+    }
+
     // 2. Regla de Negocio (RF_9): Verificar si los comentarios están habilitados
     // Se asume que existe la propiedad 'permitir_comentarios' en la entidad Publicacion
     if (publicacion.permitir_comentarios === false) {
