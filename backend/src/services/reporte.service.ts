@@ -20,8 +20,16 @@ export class ReporteService {
     const usuario = await this.usuarioRepo.findOneBy({ id_usuario });
     if (!usuario) throw new Error('NOT_FOUND: Usuario no encontrado');
 
-    const publicacion = await this.publicacionRepo.findOneBy({ id_publicacion: Number(data.id_publicacion) });
+    const publicacion = await this.publicacionRepo.findOne({
+      where: { id_publicacion: Number(data.id_publicacion) },
+      relations: ['publicante'],
+    });
+
     if (!publicacion) throw new Error('NOT_FOUND: Publicación no encontrada');
+
+    if (publicacion.publicante?.id_usuario === id_usuario) {
+      throw new Error("BAD_REQUEST: No puedes reportar tu propia publicación");
+    }
 
     // Regla de Negocio (RF_5): Límite de 30 días
     const hace30Dias = new Date();

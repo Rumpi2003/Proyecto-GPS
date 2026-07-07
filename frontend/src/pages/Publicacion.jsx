@@ -11,6 +11,7 @@ import LogoUCSC from "../assets/logos/LogoUCSC.png";
 import { useAuth } from "../context/AuthContext.jsx";
 import { crearValoracion } from "../services/valoracion.service.js";
 import { crearComentario } from "../services/comentario.service.js";
+import { crearReporte } from "../services/reporte.service.js";
 
 function normalizarNombre(nombre) {
     return String(nombre ?? "")
@@ -63,6 +64,12 @@ export default function Publicacion() {
   const [enviandoComentario, setEnviandoComentario] = useState(false);
   const [mensajeComentario, setMensajeComentario] = useState("");
   const [errorComentario, setErrorComentario] = useState("");
+  const [motivoReporte, setMotivoReporte] = useState("sospecha fraude");
+  const [detalleReporte, setDetalleReporte] = useState("");
+  const [enviandoReporte, setEnviandoReporte] = useState(false);
+  const [mensajeReporte, setMensajeReporte] = useState("");
+  const [errorReporte, setErrorReporte] = useState("");
+  const [isReporteModalOpen, setIsReporteModalOpen] = useState(false);
 
   async function publicarComentario(e) {
     e.preventDefault();
@@ -124,6 +131,72 @@ export default function Publicacion() {
     !esPropiaPublicacion &&
     !yaComentoPublicacion &&
     publicacion?.permitir_comentarios;
+
+  const motivosReporte = [
+    "sospecha fraude",
+    "información falsa",
+    "precio engañoso",
+    "arriendo no disponible",
+    "publicación duplicada",
+    "contenido inapropiado",
+    "otro",
+  ];
+
+  const puedeReportar = isAuthenticated && !esPropiaPublicacion;
+
+  async function reportarPublicacion(e) {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+        setErrorReporte("Debes iniciar sesión para reportar esta publicación.");
+        return;
+    }
+
+    if (esPropiaPublicacion) {
+        setErrorReporte("No puedes reportar tu propia publicación.");
+        return;
+    }
+
+    if (!motivoReporte) {
+        setErrorReporte("Debes seleccionar un motivo.");
+        return;
+    }
+
+    const detalleLimpio = detalleReporte.trim();
+    if (detalleLimpio.length > 255) {
+        setErrorReporte("El detalle no puede exceder los 255 caracteres.");
+        return;
+    }
+
+    try {
+        setEnviandoReporte(true);
+        setErrorReporte("");
+        setMensajeReporte("");
+
+        await crearReporte(Number(id_publicacion), motivoReporte, detalleLimpio);
+
+        setMensajeReporte("Reporte enviado correctamente.");
+        setDetalleReporte("");
+        setMotivoReporte("sospecha fraude");
+
+    } catch (err) {
+        const mensajeApi = err?.response?.data?.message;
+        setErrorReporte(mensajeApi || "No se pudo enviar el reporte.");
+    } finally {
+        setEnviandoReporte(false);
+    }
+  }
+
+  function abrirModalReporte() {
+    if (!puedeReportar || isLoading) return;
+    setErrorReporte("");
+    setMensajeReporte("");
+    setIsReporteModalOpen(true);
+  }
+
+  function cerrarModalReporte() {
+    setIsReporteModalOpen(false);
+  }
 
 
   async function valorarPublicacion(puntuacion) {
@@ -407,6 +480,38 @@ export default function Publicacion() {
                 </div> ) : ( <p className="texto">No hay cercanías registradas.</p> )}
         </section>
 
+        <section className="bg-white rounded-panel shadow-soft border border-slate-100 p-6">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                <h2 className="subtitulo">¿Detectaste un problema?</h2>
+                <p className="texto text-sm text-ustay-muted">
+                    Puedes reportar esta publicación para revisión.
+                </p>
+                </div>
+
+                <button
+                type="button"
+                onClick={abrirModalReporte}
+                disabled={!puedeReportar || isLoading}
+                className="rounded-full bg-red-600 text-white px-5 py-2.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                Reportar
+                </button>
+            </div>
+
+            {!isAuthenticated && !isLoading && (
+                <p className="texto text-sm text-ustay-muted mt-3">
+                Inicia sesión para reportar esta publicación.
+                </p>
+            )}
+
+            {esPropiaPublicacion && (
+                <p className="texto text-sm text-ustay-muted mt-3">
+                No puedes reportar tu propia publicación.
+                </p>
+            )}
+        </section>
+
         <section className="bg-white rounded-panel shadow-soft border border-slate-100 p-6 space-y-4">
             <h2 className="subtitulo">Comentarios</h2>
 
@@ -498,6 +603,88 @@ export default function Publicacion() {
       </main>
 
       <BarraInferior />
+
+      {isReporteModalOpen && (
+        <div
+            className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4"
+            onClick={cerrarModalReporte}
+        >
+            <div
+            className="bg-white rounded-panel w-full max-w-lg border border-slate-200 shadow-xl p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+            >
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                <h3 className="subtitulo">Reportar publicación</h3>
+                <p className="texto text-sm text-ustay-muted">
+                    Tu reporte será revisado por el equipo.
+                </p>
+                </div>
+
+                <button
+                type="button"
+                onClick={cerrarModalReporte}
+                className="rounded-full border border-slate-300 px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                Cerrar
+                </button>
+            </div>
+
+            <form onSubmit={reportarPublicacion} className="space-y-3">
+                <div className="space-y-2">
+                <label className="texto text-sm font-semibold">Motivo</label>
+                <select
+                    value={motivoReporte}
+                    onChange={(e) => setMotivoReporte(e.target.value)}
+                    disabled={enviandoReporte}
+                    className="w-full rounded-ustay-card border border-slate-300 p-3 texto disabled:bg-slate-100 disabled:cursor-not-allowed"
+                >
+                    {motivosReporte.map((motivo) => (
+                    <option key={motivo} value={motivo}>
+                        {motivo}
+                    </option>
+                    ))}
+                </select>
+                </div>
+
+                <div className="space-y-2">
+                <label className="texto text-sm font-semibold">Detalle (opcional)</label>
+                <textarea
+                    value={detalleReporte}
+                    onChange={(e) => setDetalleReporte(e.target.value)}
+                    maxLength={255}
+                    rows={4}
+                    placeholder="Entrega más contexto sobre el reporte..."
+                    disabled={enviandoReporte}
+                    className="w-full rounded-ustay-card border border-slate-300 p-3 texto resize-none disabled:bg-slate-100 disabled:cursor-not-allowed"
+                />
+                </div>
+
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                <p className="text-xs text-ustay-muted">
+                    {detalleReporte.trim().length}/255
+                </p>
+
+                <button
+                    type="submit"
+                    disabled={enviandoReporte}
+                    className="rounded-full bg-red-600 text-white px-4 py-2 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {enviandoReporte ? "Enviando..." : "Enviar reporte"}
+                </button>
+                </div>
+
+                {mensajeReporte && (
+                <p className="texto text-sm text-emerald-700">{mensajeReporte}</p>
+                )}
+
+                {errorReporte && (
+                <p className="texto text-sm text-red-600">{errorReporte}</p>
+                )}
+            </form>
+            </div>
+        </div>
+    )}
 
       {fotoAmpliada && (
         <div
