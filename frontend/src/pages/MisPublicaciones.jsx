@@ -26,7 +26,7 @@ export default function MisPublicaciones() {
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated) {
-      navigate("/iniciar-sesion", { replace: true });
+      navigate("/", { replace: true });
       return;
     }
     if (user?.rol === "registrado") {
