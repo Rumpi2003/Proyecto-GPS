@@ -43,6 +43,7 @@ export default function MisPublicacionesTarjeta({ publicacion, onToggle, onDelet
   const distancia = cercaniaMasCercana?.distancia_metros ?? null;
   const nombreUniversidad = cercaniaMasCercana?.universidad?.nombre_universidad ?? null;
   const esPendiente = publicacion.estado === "pendiente";
+  const esEliminada = publicacion.estado === "eliminada";
   const esActiva = publicacion.estado === "activa";
 
   return (
@@ -84,7 +85,7 @@ export default function MisPublicacionesTarjeta({ publicacion, onToggle, onDelet
         )}
 
         {/* Action buttons */}
-        {!esPendiente && (
+        {!esPendiente && !esEliminada && (
           <div className="flex items-center gap-2 pt-1">
             <button
               onClick={() => onEdit(publicacion.id_publicacion)}
@@ -105,7 +106,11 @@ export default function MisPublicacionesTarjeta({ publicacion, onToggle, onDelet
 
         {/* Bottom row: estado badge or toggle */}
         <div className="mt-auto pt-1">
-          {esPendiente ? (
+          {esEliminada ? (
+            <span className="inline-block rounded-full bg-delete-bg text-delete px-4 py-1.5 text-xs font-semibold">
+              Eliminada
+            </span>
+          ) : esPendiente ? (
             <span className="inline-block rounded-full bg-amber-100 text-amber-800 px-4 py-1.5 text-xs font-semibold">
               En revisión
             </span>

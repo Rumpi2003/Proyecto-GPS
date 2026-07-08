@@ -486,6 +486,15 @@ export default function EditarPublicacion() {
             <div className="space-y-4">
               <MapaPreview center={center} universidades={universidades} />
 
+              {/* Alerta de re‑revisión solo si estaba activa/inactiva */}
+              {publicacionData?.estado !== "pendiente" && publicacionData?.estado !== "eliminada" && (
+                <div className="bg-edit-bg border border-edit/50 rounded-ustay-card p-4">
+                  <p className="text-sm font-semibold text-edit">
+                    Al guardar los cambios, la publicación deberá pasar por revisión nuevamente antes de activarse.
+                  </p>
+                </div>
+              )}
+
               <div className="flex gap-3">
                 <button
                   type="submit"

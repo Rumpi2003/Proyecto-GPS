@@ -256,6 +256,9 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
             return;
         }
 
+        // Si la publicación estaba activa o inactiva, volver a pendiente para re‑revisión
+        const necesitaReRevision = ![Estado.PENDIENTE, Estado.ELIMINADA].includes(publicacion.estado as Estado);
+
         const datosActualizados: Partial<Publicacion> = {};
 
         if (titulo !== undefined) datosActualizados.titulo = titulo;
@@ -265,6 +268,11 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
         if (permitir_comentarios !== undefined) datosActualizados.permitir_comentarios = permitir_comentarios;
         if (estado !== undefined) datosActualizados.estado = estado;
         
+        // Forzar re‑revisión si corresponde (prevalece sobre lo que venga del body)
+        if (necesitaReRevision) {
+            datosActualizados.estado = Estado.PENDIENTE;
+        }
+
         // Actualizar la publicación solo si hay cambios
         if(Object.keys(datosActualizados).length > 0) {
             await publicacionService.update(id, datosActualizados);
@@ -396,8 +404,8 @@ export async function toggleEstadoPublicacion(req: Request, res: Response): Prom
         }
 
         if (esAdmin) {
-            // Admin puede cambiar a cualquier estado válido (excepto eliminada, que tiene otro flujo)
-            if (![Estado.ACTIVA, Estado.INACTIVA].includes(estado)) {
+            // Admin puede cambiar a cualquier estado válido
+            if (![Estado.ACTIVA, Estado.INACTIVA, Estado.ELIMINADA].includes(estado)) {
                 sendError(res, `El estado "${estado}" no es válido para esta operación`, 400);
                 return;
             }

@@ -70,8 +70,8 @@ export const idUsuarioParamSchema = Joi.object({
 });
 
 export const toggleEstadoSchema = Joi.object({
-  estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA).required().messages({
-    'any.only': 'El estado debe ser "activa" o "inactiva"',
+  estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA, Estado.ELIMINADA).required().messages({
+    'any.only': 'El estado debe ser "activa", "inactiva" o "eliminada"',
     'any.required': 'El estado es obligatorio',
   }),
 });
