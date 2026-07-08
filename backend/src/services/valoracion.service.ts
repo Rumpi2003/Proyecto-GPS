@@ -8,9 +8,17 @@ export class ValoracionService {
 
   async crear(id_usuario: number, data: { id_publicacion: number; puntuacion: number }) {
     // 1. Verificar si la publicación existe
-    const publicacion = await this.publicacionRepo.findOneBy({ id_publicacion: data.id_publicacion });
+    const publicacion = await this.publicacionRepo.findOne({
+      where: { id_publicacion: data.id_publicacion },
+      relations: ['publicante'],
+    });
+
     if (!publicacion) {
       throw new Error('NOT_FOUND: La publicación no existe');
+    }
+
+    if (publicacion.publicante?.id_usuario === id_usuario) {
+      throw new Error('BAD_REQUEST: No puedes valorar tu propia publicación');
     }
 
     // 2. Regla de Negocio (RF_4): Verificar si el usuario ya valoró esta publicación

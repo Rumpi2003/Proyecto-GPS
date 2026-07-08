@@ -2,6 +2,7 @@ import Joi from 'joi';
 import { Estado } from '../entities/publicacion.entity.js';
 
 export const createPublicacionSchema = Joi.object({
+<<<<<<< HEAD
   place_id: Joi.string().trim().required().messages({
     'string.empty': 'La dirección es obligatoria',
     'any.required': 'La dirección es obligatoria',
@@ -31,6 +32,13 @@ export const createPublicacionSchema = Joi.object({
     'string.max': 'El teléfono no puede tener más de 20 caracteres',
     'string.pattern.base': 'El teléfono no es válido. Ejemplo esperado: +56 9 1234 5678',
   }),
+=======
+  place_id: Joi.string().trim().required(),
+  titulo: Joi.string().min(3).max(70).required(),
+  descripcion: Joi.string().min(10).max(255).required(),
+  precio: Joi.number().integer().min(0).required(),
+  telefono: Joi.string().trim().min(7).max(20).required(),
+>>>>>>> origin/dev
   permitir_comentarios: Joi.boolean().default(false),
   etiquetas: Joi.array().items(Joi.number().integer().positive()).default([]),
 });

@@ -72,11 +72,18 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
 
         await etiquetaService.validarEtiquetasNoExcluyentes(etiquetas);
 
+<<<<<<< HEAD
         // Validar que esté dentro del rango de 2000m de una universidad
         const resultados = await distanciaMinima(place_id);
 
         if (!resultados || resultados.length === 0) {
             eliminarArchivosSubidos(req);
+=======
+        // Validar que este dentro del rango de 2000m de una universidad
+        const resultados = await distanciaMinima(place_id);
+
+        if (!resultados || resultados.length === 0) {
+>>>>>>> origin/dev
             sendError(res, 'la publicación debe estar a máximo 2000 metros de una universidad', 400);
             return;
         }
@@ -569,3 +576,38 @@ export async function obtenerPublicacionesInactivasUsuario(req: Request, res: Re
         sendError(res, 'Error al obtener publicaciones inactivas del usuario', 500);
     }
 }
+<<<<<<< HEAD
+=======
+
+export async function obtenerPublicacionPorId(req: Request, res: Response): Promise<void> {
+    try {
+        const { error, value } = idPublicacionParamSchema.validate(req.params, {
+        abortEarly: false,
+        stripUnknown: true
+        });
+
+        if (error) {
+            sendError(res, error.details.map((d) => d.message).join(', '), 400);
+            return;
+        }
+
+        const id = Number(value.id_publicacion);
+
+        if (Number.isNaN(id)) {
+            sendError(res, 'id_publicación inválido', 400);
+            return;
+        }
+
+        const publicacion = await publicacionService.findOneDetalle(id);
+
+        if (!publicacion) {
+            sendError(res, 'Publicación no encontrada', 404);
+            return;
+        }
+
+        sendSuccess(res, publicacion, 'Publicación obtenida', 200);
+    } catch (err) {
+        sendError(res, 'Error al obtener publicación', 500);
+    }
+}
+>>>>>>> origin/dev

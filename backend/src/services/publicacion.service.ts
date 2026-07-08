@@ -102,6 +102,20 @@ export class PublicacionService {
         });
     }
 
+    async findOneDetalle(id_publicacion: number) {
+        return this.repository.findOne({
+            where: { id_publicacion },
+            relations: [
+                'publicante',
+                'etiquetas',
+                'fotos',
+                'comentarios',
+                'comentarios.usuario',
+                'cercanias',
+                'cercanias.universidad',]
+        });
+    }
+
     async findByPublicante(id_publicante: number) {
         return this.repository.find({
             where: { publicante: { id_usuario: id_publicante} },
