@@ -3,7 +3,7 @@ import { Estado } from '../entities/publicacion.entity.js';
 
 export const createPublicacionSchema = Joi.object({
   place_id: Joi.string().trim().required(),
-  titulo: Joi.string().min(3).max(255).required(),
+  titulo: Joi.string().min(3).max(70).required(),
   descripcion: Joi.string().min(10).max(255).required(),
   precio: Joi.number().integer().min(0).required(),
   telefono: Joi.string().trim().min(7).max(20).required(),
