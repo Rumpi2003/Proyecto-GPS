@@ -19,7 +19,8 @@ export class CategoriaEtiquetaService {
         });
 
         if (existente) {
-            throw new Error('La categoría ya existe');
+            console.log(`Categoría ${nombre} ya existe`);
+            return existente;
         }
 
         const categoria = this.repository.create({

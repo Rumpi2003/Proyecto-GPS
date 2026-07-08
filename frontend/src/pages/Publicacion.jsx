@@ -28,6 +28,8 @@ const logosPorNombre = {
     "universidad san sebastian, campus las tres pascualas": LogoUSS,
 };
 
+const COMENTARIOS_POR_PAGINA = 5;
+
 function obtenerLogoUniversidad(nombreUniversidad) {
     const clave = normalizarNombre(nombreUniversidad);
     return logosPorNombre[clave] ?? LogoUBB;
@@ -70,6 +72,25 @@ export default function Publicacion() {
   const [mensajeReporte, setMensajeReporte] = useState("");
   const [errorReporte, setErrorReporte] = useState("");
   const [isReporteModalOpen, setIsReporteModalOpen] = useState(false);
+  const [paginaComentarios, setPaginaComentarios] = useState(1);
+
+  const comentarios = publicacion?.comentarios ?? [];
+
+  const totalPaginasComentarios = Math.max(
+    1,
+    Math.ceil(comentarios.length / COMENTARIOS_POR_PAGINA)
+  );
+
+  const comentariosPaginaActual = useMemo(() => {
+    const inicio = (paginaComentarios - 1) * COMENTARIOS_POR_PAGINA;
+    return comentarios.slice(inicio, inicio + COMENTARIOS_POR_PAGINA);
+  }, [comentarios, paginaComentarios]);
+
+  useEffect(() => {
+    if (paginaComentarios > totalPaginasComentarios) {
+        setPaginaComentarios(totalPaginasComentarios);
+    }
+  }, [paginaComentarios, totalPaginasComentarios]);
 
   async function publicarComentario(e) {
     e.preventDefault();
@@ -234,6 +255,7 @@ export default function Publicacion() {
         setError("No se pudo cargar la publicación");
       } finally {
         setCargando(false);
+        setPaginaComentarios(1);
       }
     }
     cargar();
@@ -573,26 +595,56 @@ export default function Publicacion() {
                     </>
                 )}
 
-                {(publicacion.comentarios ?? []).length ? (
-                    <div className="grid gap-4">
-                    {publicacion.comentarios.map((comentario, idx) => (
-                        <article
-                        key={String(comentario.id_usuario) + "-" + String(idx)}
-                        className="rounded-ustay-card border border-slate-200 px-5 py-4 md:px-6 md:py-5"
-                        >
-                        <p className="text-base md:text-lg font-semibold text-type-subtitle">
-                            {comentario.usuario?.nombre ?? "Usuario"}
-                        </p>
-                        <p className="texto text-base md:text-lg leading-relaxed">{comentario.texto}</p>
-                        <p className="text-sm text-ustay-muted mt-2">
-                            {formatearFecha(comentario.fecha_comentario)}
-                        </p>
-                        </article>
-                    ))}
-                    </div>
-                ) : (
-                    <p className="texto">Esta publicación aún no tiene comentarios.</p>
+                {comentarios.length ? (
+                <>
+                <div className="grid gap-4">
+                {comentariosPaginaActual.map((comentario, idx) => (
+                    <article
+                    key={String(comentario.id_usuario) + "-" + String((paginaComentarios - 1) * COMENTARIOS_POR_PAGINA + idx)}
+                    className="min-w-0 rounded-ustay-card border border-slate-200 px-5 py-4 md:px-6 md:py-5"
+                    >
+                    <p className="text-base md:text-lg font-semibold text-type-subtitle">
+                        {comentario.usuario?.nombre ?? "Usuario"}
+                    </p>
+                    <p className="texto text-base md:text-lg leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{comentario.texto}</p>
+                    <p className="text-sm text-ustay-muted mt-2">
+                        {formatearFecha(comentario.fecha_comentario)}
+                    </p>
+                    </article>
+                ))}
+                </div>
+
+                {totalPaginasComentarios > 1 && (
+                  <div className="flex items-center justify-between gap-3 flex-wrap pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setPaginaComentarios((p) => Math.max(1, p - 1))}
+                      disabled={paginaComentarios === 1}
+                      className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                    >
+                      Anterior
+                    </button>
+
+                    <p className="texto text-sm">
+                      Página {paginaComentarios} de {totalPaginasComentarios}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => setPaginaComentarios((p) => Math.min(totalPaginasComentarios, p + 1))}
+                      disabled={paginaComentarios === totalPaginasComentarios}
+                      className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                    >
+                      Siguiente
+                    </button>
+                  </div>
                 )}
+                </>
+            ) : (
+                <p className="texto">Esta publicación aún no tiene comentarios.</p>
+            )}
+
+                
                 </>
             ) : (
                 <p className="texto">
