@@ -26,3 +26,15 @@ export async function eliminarPublicacion(id_publicacion) {
     const res = await api.delete(`/publicaciones/${id_publicacion}`);
     return res.data.data;
 }
+
+export async function getPublicacionById(id_publicacion) {
+    const res = await api.get(`/publicaciones/${id_publicacion}`);
+    return res.data.data;
+}
+
+export async function updatePublicacion(id_publicacion, formData) {
+    const res = await api.put(`/publicaciones/${id_publicacion}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data;
+}

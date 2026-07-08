@@ -98,7 +98,7 @@ export class PublicacionService {
     async findOne(id_publicacion: number) {
         return this.repository.findOne({
             where: { id_publicacion },
-            relations: ['publicante', 'etiquetas', 'fotos'],
+            relations: ['publicante', 'etiquetas', 'fotos', 'cercanias', 'cercanias.universidad'],
         });
     }
 

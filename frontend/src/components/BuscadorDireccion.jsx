@@ -166,7 +166,7 @@ export default function BuscadorDireccion({ onPlaceSelect }) {
       });
 
       if (!place.location) {
-        setError("Seleccioná una dirección de las sugerencias");
+        setError("Selecciona una dirección de las sugerencias");
         return;
       }
 

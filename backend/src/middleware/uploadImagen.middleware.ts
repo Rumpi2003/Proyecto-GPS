@@ -72,10 +72,58 @@ export function uploadPublicacion(req: Request, res: Response, next: NextFunctio
     }
 
     // Compresión — no bloqueamos la respuesta
-    const todas = [portadaFile, ...fotosFiles].filter(Boolean);
+    const todas = [portadaFile, ...fotosFiles].filter((f): f is Express.Multer.File => f != null);
     Promise.all(todas.map((f) => compressImage(f.path))).catch((e) => {
       console.error('Error comprimiendo imágenes:', e);
     });
+
+    next();
+  });
+}
+
+/**
+ * Middleware para ACTUALIZAR publicación — portada es OPCIONAL.
+ * Solo comprime y valida si se subieron archivos.
+ */
+export function uploadPublicacionUpdate(req: Request, res: Response, next: NextFunction) {
+  upload.fields([
+    { name: 'portada', maxCount: 1 },
+    { name: 'fotos', maxCount: 4 },
+  ])(req, res, async (err) => {
+    if (err) {
+      eliminarArchivosSubidos(req);
+
+      const message =
+        err instanceof multer.MulterError
+          ? err.code === 'LIMIT_FILE_SIZE'
+            ? 'La imagen supera el tamaño máximo de 30 MB'
+            : err.code === 'LIMIT_UNEXPECTED_FILE'
+              ? 'Demasiados archivos. Máximo 4 fotos adicionales'
+              : err.message
+          : err.message;
+
+      res.status(400).json({ status: 'error', message: [message] });
+      return;
+    }
+
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+    const portadaFile = files?.['portada']?.[0];
+    const fotosFiles = files?.['fotos'] ?? [];
+
+    // Portada es OPCIONAL en actualización — solo validar si se subió
+    if (fotosFiles.length > 4) {
+      eliminarArchivosSubidos(req);
+      res.status(400).json({ status: 'error', message: ['Máximo 4 fotos adicionales'] });
+      return;
+    }
+
+    // Compresión — no bloqueamos la respuesta
+    const todas = [portadaFile, ...fotosFiles].filter((f): f is Express.Multer.File => f != null);
+    if (todas.length > 0) {
+      Promise.all(todas.map((f) => compressImage(f.path))).catch((e) => {
+        console.error('Error comprimiendo imágenes:', e);
+      });
+    }
 
     next();
   });

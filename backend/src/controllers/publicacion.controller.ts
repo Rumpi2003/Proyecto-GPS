@@ -157,10 +157,42 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
             nuevoToken = generarToken({ id: publicante.id_usuario, rol: Rol.PUBLICANTE });
         }
         
-        sendSuccess(res, { publicacion: nueva, resultados, token: nuevoToken }, 'publicacion creada', 201);
+        sendSuccess(res, { publicacion: nueva, resultados, token: nuevoToken }, 'Publicación creada', 201);
     } catch (err) {
         if (!filesOwned) eliminarArchivosSubidos(req);
         sendError(res, 'Error al crear publicación', 500);
+    }
+}
+
+export async function obtenerPublicacion(req: Request, res: Response): Promise<void> {
+    try {
+        const { error, value } = idPublicacionParamSchema.validate(req.params, {
+            abortEarly: false,
+            stripUnknown: true,
+        });
+
+        if (error) {
+            sendError(res, error.details.map((d) => d.message), 400);
+            return;
+        }
+
+        const id = Number(value.id_publicacion);
+
+        if (Number.isNaN(id)) {
+            sendError(res, 'id_publicación inválido', 400);
+            return;
+        }
+
+        const publicacion = await publicacionService.findOne(id);
+
+        if (!publicacion) {
+            sendError(res, 'Publicación no encontrada', 404);
+            return;
+        }
+
+        sendSuccess(res, publicacion, 'Publicación obtenida', 200);
+    } catch (err) {
+        sendError(res, 'Error al obtener publicación', 500);
     }
 }
 
@@ -250,9 +282,10 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
 
         // Si subieron una portada nueva, reemplazar la anterior
         if (nuevaPortada) {
-            // Remover la portada anterior (si existe)
+            // Remover la portada anterior (si existe), salvo que ya se haya
+            // eliminado via eliminar_fotos (para evitar doble-borrado)
             const viejaPortada = publicacion.fotos?.find((f) => f.es_portada);
-            if (viejaPortada) {
+            if (viejaPortada && !eliminar_fotos.includes(viejaPortada.id_foto)) {
                 await publicacionService.removeFoto(viejaPortada.id_foto);
             }
             await publicacionService.addFoto(id, `/uploads/${nuevaPortada.filename}`, true);

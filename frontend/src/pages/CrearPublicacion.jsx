@@ -74,12 +74,12 @@ export default function CrearPublicacion() {
     setError("");
 
     if (!direccion.place_id) {
-      setError("Seleccioná una dirección válida de las sugerencias");
+      setError("Selecciona una dirección válida de las sugerencias");
       return;
     }
 
     if (!form.portada) {
-      setError("Seleccioná una foto de portada");
+      setError("Selecciona una foto de portada");
       return;
     }
 
@@ -127,9 +127,9 @@ export default function CrearPublicacion() {
         <BarraNavegacion />
         <main className="flex-grow flex items-center justify-center p-6">
           <div className="bg-white rounded-panel shadow-soft p-8 max-w-md text-center border border-[#B6D5FE]">
-            <h2 className="titulo mb-2">Iniciá sesión</h2>
+            <h2 className="titulo mb-2">Inicia sesión</h2>
             <p className="texto text-sm text-ustay-muted mb-4">
-              Necesitás una cuenta registrada para publicar arriendos.
+              Necesitas una cuenta registrada para publicar arriendos.
             </p>
             <button
               onClick={() => navigate("/")}

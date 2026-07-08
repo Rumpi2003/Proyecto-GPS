@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const MAX_FOTOS = 4;
+const MAX_FOTOS_DEFAULT = 4;
 const FORMATOS_PERMITIDOS = ['.jpg', '.jpeg', '.png'];
 const TIPOS_PERMITIDOS = ['image/jpeg', 'image/png'];
 
@@ -55,6 +55,7 @@ export default function SubirFotos({
   fotos = [],
   onChangePortada,
   onChangeFotos,
+  maxFotos = MAX_FOTOS_DEFAULT,
 }) {
   const portadaRef = useRef(null);
   const [error, setError] = useState("");
@@ -82,8 +83,8 @@ export default function SubirFotos({
       return;
     }
 
-    if (fotos.length >= MAX_FOTOS) {
-      setError(`Máximo ${MAX_FOTOS} fotos adicionales`);
+    if (fotos.length >= maxFotos) {
+      setError(`Máximo ${maxFotos} fotos adicionales`);
       e.target.value = "";
       return;
     }
@@ -132,22 +133,20 @@ export default function SubirFotos({
       {/* Fotos adicionales */}
       <div className="space-y-2">
         <label className="subtitulo text-texto">
-          Fotos adicionales {fotos.length > 0 && `(${fotos.length}/${MAX_FOTOS})`}
+          Fotos adicionales {fotos.length > 0 && `(${fotos.length}/${maxFotos})`}
         </label>
 
-        <div className="flex gap-2">
-          <input
-            type="file"
-            accept=".jpg,.jpeg,.png"
-            onChange={handleFotoChange}
-            disabled={fotos.length >= MAX_FOTOS}
-            className="flex-1 rounded-[25px] border px-4 py-2.5 texto bg-[#F3F4F6] border-[#B6D5FE] file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:bg-ustay-blue file:text-white file:text-xs file:font-semibold hover:file:bg-ustay-blue-dark transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-        </div>
+        <input
+          type="file"
+          accept=".jpg,.jpeg,.png"
+          onChange={handleFotoChange}
+          disabled={fotos.length >= maxFotos}
+          className="w-full rounded-[25px] border px-4 py-2.5 texto bg-[#F3F4F6] border-[#B6D5FE] file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:bg-ustay-blue file:text-white file:text-xs file:font-semibold hover:file:bg-ustay-blue-dark transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        />
 
-        {fotos.length >= MAX_FOTOS && (
+        {fotos.length >= maxFotos && (
           <p className="text-[10px] text-ustay-muted">
-            Máximo {MAX_FOTOS} fotos adicionales alcanzado
+            Máximo {maxFotos} fotos adicionales alcanzado
           </p>
         )}
 
