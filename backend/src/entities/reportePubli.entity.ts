@@ -5,7 +5,7 @@ import type { Usuario as UsuarioType } from './usuario.entity.js';
 import type { Publicacion as PublicacionType } from './publicacion.entity.js';
 
 export enum Motivo {
-	FRAUDE = 'sospecha fraude',
+    FRAUDE = 'sospecha fraude',
     INFORMACION_FALSA = 'información falsa',
     PRECIO_ENGAÑOSO = 'precio engañoso',
     NO_DISPONIBLE = 'arriendo no disponible',
@@ -21,16 +21,16 @@ export enum Estado {
     DESESTIMADO = 'desestimado',
 }
 
-@Entity({ name: 'reporte' })
-export class Reporte {
+@Entity({ name: 'reporte_publi' })
+export class ReportePubli {
     @PrimaryGeneratedColumn({ name: 'id_reporte', type: 'int' })
     id_reporte!: number;
 
-    @ManyToOne(() => Usuario, (usuario) => usuario.id_usuario, { nullable: false, onDelete: 'CASCADE' })
+    @ManyToOne(() => Usuario, (usuario) => usuario.reportesPublicaciones, { nullable: false, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'id_usuario' })
     usuario!: UsuarioType;
 
-    @ManyToOne(() => Publicacion, (publicacion) => publicacion.id_publicacion, { nullable: false, onDelete: 'CASCADE' })
+    @ManyToOne(() => Publicacion, (publicacion) => publicacion.reportes, { nullable: false, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'id_publicacion' })
     publicacion!: PublicacionType;
 
@@ -43,12 +43,12 @@ export class Reporte {
     @Column({ type: 'enum', enum: Estado, default: Estado.PENDIENTE })
     estado!: Estado;
 
-    // Campos opcionales para auditoría del reporte
-    //@Column({ type: 'varchar', length: 45, nullable: true })
-    //ip_reporte!: string | null;
+    // Campos de auditoría de seguridad integrados
+    @Column({ type: 'varchar', length: 45, nullable: false })
+    ip_reporte!: string;
 
-    //@Column({ type: 'varchar', length: 255, nullable: true })
-    //user_agent!: string | null;
+    @Column({ type: 'text', nullable: false })
+    user_agent!: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     fecha_reporte!: Date;

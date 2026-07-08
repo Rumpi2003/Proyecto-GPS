@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useNavigate } from "react-router-dom"; // <-- Importamos useNavigate
 
 export const AuthModal = ({ isOpen, onClose }) => {
   const { login, register } = useAuth();
+  const navigate = useNavigate(); // <-- Inicializamos el hook
   const [mode, setMode] = useState("login");
   const [nombre, setNombre] = useState("");
   const [correo, setCorreo] = useState("");
@@ -34,16 +36,27 @@ export const AuthModal = ({ isOpen, onClose }) => {
     setError("");
     setIsSubmitting(true);
     try {
+      let usuarioLogueado; // <-- Variable para guardar al usuario
+
       if (mode === "login") {
-        await login(correo, contraseña);
+        usuarioLogueado = await login(correo, contraseña);
       } else {
-        await register({ nombre, correo, contraseña });
+        usuarioLogueado = await register({ nombre, correo, contraseña });
       }
+      
       resetForm();
       onClose();
+
+      // <-- Validamos el rol y redirigimos si es administrador
+      if (usuarioLogueado && usuarioLogueado.rol === "administrador") {
+        navigate("/admin");
+      }
+      // Si no es admin, el modal simplemente se cierra y el usuario se queda
+      // en la pantalla donde estaba navegando.
+
     } catch (err) {
       setError(
-        err?.response?.data?.message || err.message || "Error inesperado",
+        err?.response?.data?.message || err.message || "Error inesperado"
       );
     } finally {
       setIsSubmitting(false);

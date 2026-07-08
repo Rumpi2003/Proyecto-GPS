@@ -2,23 +2,23 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, ManyToMan
 import { Usuario } from './usuario.entity.js';
 import { Comentario } from './comentario.entity.js';
 import { Valoracion } from './valoracion.entity.js';
-import { Reporte } from './reporte.entity.js';
+import { ReportePubli } from './reportePubli.entity.js';
 import { Etiqueta } from './etiqueta.entity.js';
 import { Cercania } from './cercania.entity.js';
 import { Foto } from './foto.entity.js';
 import type { Usuario as UsuarioType } from './usuario.entity.js';
 import type { Comentario as ComentarioType } from './comentario.entity.js';
 import type { Valoracion as ValoracionType } from './valoracion.entity.js';
-import type { Reporte as ReporteType } from './reporte.entity.js';
+import type { ReportePubli as ReportePubliType } from './reportePubli.entity.js';
 import type { Etiqueta as EtiquetaType } from './etiqueta.entity.js';
 import type { Cercania as CercaniaType } from './cercania.entity.js';
 import type { Foto as FotoType } from './foto.entity.js';
 
 export enum Estado {
-  ACTIVA = 'activa',
-  INACTIVA = 'inactiva',
-  ELIMINADA = 'eliminada',
-  PENDIENTE = 'pendiente',
+ACTIVA = 'activa',
+INACTIVA = 'inactiva',
+ELIMINADA = 'eliminada',
+PENDIENTE = 'pendiente',
 }
 
 @Entity({ name: 'publicacion' })
@@ -66,8 +66,8 @@ export class Publicacion {
 	@OneToMany(() => Valoracion, (valoracion) => valoracion.publicacion)
 	valoraciones!: ValoracionType[];
 
-	@OneToMany(() => Reporte, (reporte) => reporte.publicacion)
-	reportes!: ReporteType[];
+	@OneToMany(() => ReportePubli, (reporte) => reporte.publicacion)
+    reportes!: ReportePubliType[];
 
 	@ManyToMany(() => Etiqueta, (etiqueta) => etiqueta.publicaciones)
 	@JoinTable({
