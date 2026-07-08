@@ -3,6 +3,7 @@ import {
     crearPublicacion,
     actualizarPublicacion,
     eliminarPublicacion,
+    toggleEstadoPublicacion,
     obtenerPublicacionesPorFiltros,
     obtenerPublicacionesUsuario,
     obtenerPublicacionesActivasUsuario,
@@ -17,6 +18,7 @@ const router = Router();
 
 router.post('/', authenticate, esRegistradoPublicante, uploadPublicacion, crearPublicacion);
 router.put('/:id_publicacion', authenticate, esDueñoPublicacion, uploadPublicacion, actualizarPublicacion);
+router.patch('/:id_publicacion/estado', authenticate, esDueñoPublicacion, toggleEstadoPublicacion);
 router.delete('/:id_publicacion', authenticate, esDueñoPublicacion, eliminarPublicacion);
 router.get('/filtros', obtenerPublicacionesPorFiltros);
 router.get('/usuario/:id_usuario', authenticate, esRegistradoPublicante, obtenerPublicacionesUsuario);

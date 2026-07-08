@@ -5,7 +5,7 @@ import { distanciaMinima } from "../middleware/distanciaMinima.middleware.js";
 import { direccionExiste } from "../middleware/direccionExistente.middleware.js";
 import { Usuario, Rol } from "../entities/usuario.entity.js";
 import { EtiquetaService } from "../services/etiqueta.service.js";
-import { type Publicacion } from "../entities/publicacion.entity.js";
+import { Estado, type Publicacion } from "../entities/publicacion.entity.js";
 import { generarToken } from "../services/auth.service.js";
 import { actualizar, obtenerPorId } from "../services/usuario.service.js";
 import { eliminarArchivosSubidos } from '../middleware/uploadImagen.middleware.js';
@@ -15,6 +15,7 @@ import {
     idPublicacionParamSchema,
     idUsuarioParamSchema,
     filtrosPublicacionSchema,
+    toggleEstadoSchema,
 } from '../validations/publicacion.validation.js';
 
 const publicacionService = new PublicacionService();
@@ -321,6 +322,69 @@ export async function eliminarPublicacion(req: Request, res: Response): Promise<
         sendSuccess(res, null, 'Publicación eliminada', 200);
     } catch (err) {
         sendError(res, 'Error al eliminar publicación', 500);
+    }
+}
+
+export async function toggleEstadoPublicacion(req: Request, res: Response): Promise<void> {
+    try {
+        const { error: paramsError, value: paramsValue } = idPublicacionParamSchema.validate(req.params, {
+            abortEarly: false,
+            stripUnknown: true,
+        });
+
+        if (paramsError) {
+            sendError(res, paramsError.details.map((d) => d.message), 400);
+            return;
+        }
+
+        const { error: bodyError, value: bodyValue } = toggleEstadoSchema.validate(req.body, {
+            abortEarly: false,
+            stripUnknown: true,
+        });
+
+        if (bodyError) {
+            sendError(res, bodyError.details.map((d) => d.message), 400);
+            return;
+        }
+
+        const id = Number(paramsValue.id_publicacion);
+        const { estado } = bodyValue;
+        const esAdmin = req.user?.rol === "administrador";
+
+        const publicacion = await publicacionService.findOne(id);
+        if (!publicacion) {
+            sendError(res, 'Publicación no encontrada', 404);
+            return;
+        }
+
+        if (publicacion.estado === estado) {
+            sendError(res, `La publicación ya se encuentra en estado "${estado}"`, 400);
+            return;
+        }
+
+        if (esAdmin) {
+            // Admin puede cambiar a cualquier estado válido (excepto eliminada, que tiene otro flujo)
+            if (![Estado.ACTIVA, Estado.INACTIVA].includes(estado)) {
+                sendError(res, `El estado "${estado}" no es válido para esta operación`, 400);
+                return;
+            }
+        } else {
+            // Dueño solo puede toggle entre activa ↔ inactiva
+            if (publicacion.estado === Estado.PENDIENTE) {
+                sendError(res, 'No puedes cambiar el estado de una publicación en revisión', 400);
+                return;
+            }
+
+            if (![Estado.ACTIVA, Estado.INACTIVA].includes(estado)) {
+                sendError(res, `El estado "${estado}" no es válido para esta operación`, 400);
+                return;
+            }
+        }
+
+        const publicacionActualizada = await publicacionService.update(id, { estado });
+        sendSuccess(res, publicacionActualizada, 'Estado actualizado', 200);
+    } catch (err) {
+        sendError(res, 'Error al actualizar el estado de la publicación', 500);
     }
 }
 

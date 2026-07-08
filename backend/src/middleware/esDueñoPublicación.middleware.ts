@@ -21,7 +21,7 @@ export async function esDueñoPublicacion(req: Request, res: Response, next: Nex
         return;
     }
 
-    if (!req.user || publicacion.publicante.id_usuario !== req.user.id) {
+    if (!req.user || (publicacion.publicante.id_usuario !== req.user.id && req.user.rol !== 'administrador')) {
         res.status(403).json({ status: 'error', message: 'No tienes permiso para modificar esta publicación' });
         return;
     }

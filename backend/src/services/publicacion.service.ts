@@ -105,7 +105,7 @@ export class PublicacionService {
     async findByPublicante(id_publicante: number) {
         return this.repository.find({
             where: { publicante: { id_usuario: id_publicante} },
-            relations: ['publicante', 'etiquetas', 'fotos'],
+            relations: ['publicante', 'etiquetas', 'fotos', 'cercanias', 'cercanias.universidad'],
         });
     }
 
@@ -115,7 +115,7 @@ export class PublicacionService {
                  publicante: { id_usuario: id_publicante},
                 estado: Estado.ACTIVA,
              },
-            relations: ['publicante', 'etiquetas', 'fotos'],
+            relations: ['publicante', 'etiquetas', 'fotos', 'cercanias'],
         });
     }
 
@@ -125,7 +125,7 @@ export class PublicacionService {
                  publicante: { id_usuario: id_publicante},
                 estado: Estado.INACTIVA,
              },
-            relations: ['publicante', 'etiquetas', 'fotos'],
+            relations: ['publicante', 'etiquetas', 'fotos', 'cercanias'],
         });
     }
 

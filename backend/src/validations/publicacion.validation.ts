@@ -69,6 +69,13 @@ export const idUsuarioParamSchema = Joi.object({
   id_usuario: Joi.number().integer().positive().required(),
 });
 
+export const toggleEstadoSchema = Joi.object({
+  estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA).required().messages({
+    'any.only': 'El estado debe ser "activa" o "inactiva"',
+    'any.required': 'El estado es obligatorio',
+  }),
+});
+
 export const filtrosPublicacionSchema = Joi.object({
   id_universidad: Joi.number().integer().positive().required(),
   distancia_max: Joi.number().positive(),

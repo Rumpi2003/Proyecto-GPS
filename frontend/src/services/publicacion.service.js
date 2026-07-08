@@ -11,3 +11,18 @@ export async function createPublicacion(formData) {
     });
     return res.data.data;
 }
+
+export async function getMisPublicaciones(id_usuario) {
+    const res = await api.get(`/publicaciones/usuario/${id_usuario}`);
+    return res.data.data;
+}
+
+export async function toggleEstado(id_publicacion, estado) {
+    const res = await api.patch(`/publicaciones/${id_publicacion}/estado`, { estado });
+    return res.data.data;
+}
+
+export async function eliminarPublicacion(id_publicacion) {
+    const res = await api.delete(`/publicaciones/${id_publicacion}`);
+    return res.data.data;
+}
