@@ -72,18 +72,11 @@ export async function crearPublicacion(req: Request, res: Response): Promise<voi
 
         await etiquetaService.validarEtiquetasNoExcluyentes(etiquetas);
 
-<<<<<<< HEAD
         // Validar que esté dentro del rango de 2000m de una universidad
         const resultados = await distanciaMinima(place_id);
 
         if (!resultados || resultados.length === 0) {
             eliminarArchivosSubidos(req);
-=======
-        // Validar que este dentro del rango de 2000m de una universidad
-        const resultados = await distanciaMinima(place_id);
-
-        if (!resultados || resultados.length === 0) {
->>>>>>> origin/dev
             sendError(res, 'la publicación debe estar a máximo 2000 metros de una universidad', 400);
             return;
         }
@@ -576,8 +569,6 @@ export async function obtenerPublicacionesInactivasUsuario(req: Request, res: Re
         sendError(res, 'Error al obtener publicaciones inactivas del usuario', 500);
     }
 }
-<<<<<<< HEAD
-=======
 
 export async function obtenerPublicacionPorId(req: Request, res: Response): Promise<void> {
     try {
@@ -610,4 +601,3 @@ export async function obtenerPublicacionPorId(req: Request, res: Response): Prom
         sendError(res, 'Error al obtener publicación', 500);
     }
 }
->>>>>>> origin/dev

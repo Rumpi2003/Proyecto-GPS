@@ -26,11 +26,5 @@ router.get('/filtros', obtenerPublicacionesPorFiltros);
 router.get('/usuario/:id_usuario', authenticate, esRegistradoPublicante, obtenerPublicacionesUsuario);
 router.get('/usuario/:id_usuario/activas', authenticate, esRegistradoPublicante, obtenerPublicacionesActivasUsuario);
 router.get('/usuario/:id_usuario/inactivas', authenticate, esRegistradoPublicante, obtenerPublicacionesInactivasUsuario);
-<<<<<<< HEAD
-router.get('/:id_publicacion', authenticate, esDueñoPublicacion, obtenerPublicacion);
-
-export default router;
-=======
 router.get('/:id_publicacion', obtenerPublicacionPorId);
 export default router;
->>>>>>> origin/dev
