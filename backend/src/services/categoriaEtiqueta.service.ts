@@ -19,7 +19,6 @@ export class CategoriaEtiquetaService {
         });
 
         if (existente) {
-            console.log(`Categoría ${nombre} ya existe`);
             return existente;
         }
 

@@ -46,7 +46,6 @@ export class EtiquetaService {
         });
 
         if (etiquetaExistente) {
-            console.log(`Etiqueta ${nombreEtiqueta} ya existe en la categoría ${categoria.nombre_categoria}`);
             return etiquetaExistente;
         }
 

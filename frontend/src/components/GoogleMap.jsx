@@ -174,7 +174,7 @@ export default function GoogleMap(props) {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   return (
-    <Wrapper apiKey={apiKey} render={(status) => <div>{status}</div>}>
+    <Wrapper apiKey={apiKey} libraries={["places"]} render={(status) => <div>{status}</div>}>
       <Mapa {...props} />
     </Wrapper>
   );
