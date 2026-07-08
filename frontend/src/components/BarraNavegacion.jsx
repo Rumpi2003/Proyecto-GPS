@@ -1,14 +1,16 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useState } from "react";
 import { AuthModal } from "./AuthModal.jsx";
 
 export const BarraNavegacion = () => {
   const { isAuthenticated, role, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
+    navigate("/");
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
