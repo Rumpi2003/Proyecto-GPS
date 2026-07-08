@@ -256,19 +256,31 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
             return;
         }
 
-        // Si la publicación estaba activa o inactiva, volver a pendiente para re‑revisión
-        const necesitaReRevision = ![Estado.PENDIENTE, Estado.ELIMINADA].includes(publicacion.estado as Estado);
-
         const datosActualizados: Partial<Publicacion> = {};
 
-        if (titulo !== undefined) datosActualizados.titulo = titulo;
-        if (descripcion !== undefined) datosActualizados.descripcion = descripcion;
-        if (precio !== undefined) datosActualizados.precio = Number(precio);
-        if (telefono !== undefined) datosActualizados.telefono = telefono;
-        if (permitir_comentarios !== undefined) datosActualizados.permitir_comentarios = permitir_comentarios;
+        // Solo guardar campos que REALMENTE cambiaron
+        if (titulo !== undefined && titulo !== publicacion.titulo) datosActualizados.titulo = titulo;
+        if (descripcion !== undefined && descripcion !== publicacion.descripcion) datosActualizados.descripcion = descripcion;
+        if (precio !== undefined && Number(precio) !== Number(publicacion.precio)) datosActualizados.precio = Number(precio);
+        if (telefono !== undefined && telefono !== publicacion.telefono) datosActualizados.telefono = telefono;
+        if (permitir_comentarios !== undefined && permitir_comentarios !== publicacion.permitir_comentarios) datosActualizados.permitir_comentarios = permitir_comentarios;
         if (estado !== undefined) datosActualizados.estado = estado;
+
+        // Solo cambios visibles que sean DIFERENTES a lo actual justifican re‑revisión
+        const archivosSubidos = getFiles(req);
+        const hayCambiosVisibles =
+            datosActualizados.titulo !== undefined ||
+            datosActualizados.descripcion !== undefined ||
+            eliminar_fotos.length > 0 ||
+            !!archivosSubidos.portada ||
+            archivosSubidos.fotos.length > 0;
+
+        // Si la publicación estaba activa o inactiva y hay cambios visibles,
+        // volver a pendiente para re‑revisión
+        const necesitaReRevision = hayCambiosVisibles &&
+            ![Estado.PENDIENTE, Estado.ELIMINADA].includes(publicacion.estado as Estado);
         
-        // Forzar re‑revisión si corresponde (prevalece sobre lo que venga del body)
+        // Forzar re‑revisión si corresponde
         if (necesitaReRevision) {
             datosActualizados.estado = Estado.PENDIENTE;
         }

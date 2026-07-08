@@ -10,6 +10,7 @@ import MapaPreview from "../components/MapaPreview.jsx";
 import { getEtiquetas } from "../services/etiqueta.service.js";
 import { getUniversidades } from "../services/universidad.service.js";
 import { getPublicacionById, updatePublicacion } from "../services/publicacion.service.js";
+import ComentariosCard from "../components/ComentariosCard.jsx";
 import { Wrapper } from "@googlemaps/react-wrapper";
 
 function obtenerUrlFoto(url) {
@@ -61,6 +62,7 @@ export default function EditarPublicacion() {
   const [publicacionData, setPublicacionData] = useState(null);
   const etiquetasOriginalesRef = useRef([]);
   const [fotosAEliminar, setFotosAEliminar] = useState([]); // IDs de fotos a eliminar
+  const [formOriginal, setFormOriginal] = useState(null);
 
   const [direccion, setDireccion] = useState({
     direccion: "",
@@ -85,7 +87,7 @@ export default function EditarPublicacion() {
         const idsEtiquetas = (publicacion.etiquetas || []).map((e) => e.id_etiqueta);
         etiquetasOriginalesRef.current = idsEtiquetas;
 
-        setForm({
+        const formInicial = {
           titulo: publicacion.titulo || "",
           descripcion: publicacion.descripcion || "",
           precio: publicacion.precio?.toString() || "",
@@ -94,7 +96,9 @@ export default function EditarPublicacion() {
           portada: null,
           fotos: [],
           etiquetas: idsEtiquetas,
-        });
+        };
+        setForm(formInicial);
+        setFormOriginal(formInicial);
 
         // Set address & coordinates
         const coords = extraerCoordenadas(publicacion.coordenadas);
@@ -133,9 +137,38 @@ export default function EditarPublicacion() {
     );
   }
 
+  function hayCambiosReales() {
+    if (!formOriginal) return true;
+    if (form.titulo !== formOriginal.titulo) return true;
+    if (form.descripcion !== formOriginal.descripcion) return true;
+    if (form.precio !== formOriginal.precio) return true;
+    if (form.telefono !== formOriginal.telefono) return true;
+    if (form.permitir_comentarios !== formOriginal.permitir_comentarios) return true;
+    if (JSON.stringify([...form.etiquetas].sort()) !== JSON.stringify([...formOriginal.etiquetas].sort())) return true;
+    if (form.portada) return true;
+    if (form.fotos.length > 0) return true;
+    if (fotosAEliminar.length > 0) return true;
+    return false;
+  }
+
+  function hayCambiosRealesEnVisibles() {
+    if (!formOriginal) return false;
+    if (form.titulo !== formOriginal.titulo) return true;
+    if (form.descripcion !== formOriginal.descripcion) return true;
+    if (form.portada) return true;
+    if (form.fotos.length > 0) return true;
+    if (fotosAEliminar.length > 0) return true;
+    return false;
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
+    if (!hayCambiosReales()) {
+      navigate("/mis-publicaciones");
+      return;
+    }
 
     // Si eliminaron la portada sin subir una nueva, advertir
     if (portadaExistente && fotosAEliminar.includes(portadaExistente.id_foto) && !form.portada) {
@@ -486,11 +519,13 @@ export default function EditarPublicacion() {
             <div className="space-y-4">
               <MapaPreview center={center} universidades={universidades} />
 
-              {/* Alerta de re‑revisión solo si estaba activa/inactiva */}
-              {publicacionData?.estado !== "pendiente" && publicacionData?.estado !== "eliminada" && (
+              {/* Alerta de re‑revisión dinámica según qué cambió */}
+              {publicacionData?.estado !== "pendiente" && publicacionData?.estado !== "eliminada" && hayCambiosReales() && (
                 <div className="bg-edit-bg border border-edit/50 rounded-ustay-card p-4">
                   <p className="text-sm font-semibold text-edit">
-                    Al guardar los cambios, la publicación deberá pasar por revisión nuevamente antes de activarse.
+                    {hayCambiosRealesEnVisibles()
+                      ? "Al modificar título, descripción o fotos, la publicación deberá pasar por revisión antes de activarse nuevamente."
+                      : "Los cambios en precio, teléfono, etiquetas o comentarios se guardarán sin necesidad de una nueva revisión."}
                   </p>
                 </div>
               )}
@@ -537,6 +572,11 @@ export default function EditarPublicacion() {
                   <p className="text-sm text-danger font-medium">{error}</p>
                 </div>
               )}
+
+              <ComentariosCard
+                idPublicacion={Number(id)}
+                permitirComentarios={form.permitir_comentarios}
+              />
             </div>
           </div>
           </Wrapper>
