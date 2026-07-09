@@ -1,6 +1,15 @@
+function obtenerUrlFoto(url) {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  const base = import.meta.env.VITE_API_URL || "";
+  const apiBase = base.replace(/\/api\/?$/, "");
+  return apiBase ? `${apiBase}${url}` : url;
+}
+
 function obtenerPortada(publicacion) {
   const portada = publicacion.fotos?.find((foto) => foto.es_portada);
-  return portada?.url_foto ?? publicacion.fotos?.[0]?.url_foto ?? "";
+  const url = portada?.url_foto ?? publicacion.fotos?.[0]?.url_foto ?? "";
+  return obtenerUrlFoto(url);
 }
 
 function obtenerDistancia(publicacion, universidadId) {
@@ -15,7 +24,6 @@ function formatearPrecio(precio) {
   const valor = Number(precio ?? 0);
   return valor.toLocaleString("es-CL");
 }
-
 
 export default function TarjetaPublicacion({
   publicacion,

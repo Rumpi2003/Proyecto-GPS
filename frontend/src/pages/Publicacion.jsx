@@ -44,10 +44,19 @@ function formatearFecha(fecha) {
   });
 }
 
+function obtenerUrlFoto(url) {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    const base = import.meta.env.VITE_API_URL || "";
+    const apiBase = base.replace(/\/api\/?$/, "");
+    return apiBase ? `${apiBase}${url}` : url;
+}
+
 function portadaDe(publicacion) {
-  if (!publicacion?.fotos?.length) return "";
-  const portada = publicacion.fotos.find((f) => f.es_portada);
-  return portada?.url_foto ?? publicacion.fotos[0].url_foto;
+    if (!publicacion?.fotos?.length) return "";
+    const portada = publicacion.fotos.find((f) => f.es_portada);
+    const url = portada?.url_foto ?? publicacion.fotos[0].url_foto ?? "";
+    return obtenerUrlFoto(url);
 }
 
 export default function Publicacion() {
@@ -251,6 +260,7 @@ export default function Publicacion() {
         setCargando(true);
         const data = await getPublicacionById(id_publicacion);
         setPublicacion(data);
+        setIndiceCarrusel(0);
       } catch (err) {
         setError("No se pudo cargar la publicación");
       } finally {
@@ -472,11 +482,11 @@ export default function Publicacion() {
                         <button
                             key={foto.id_foto}
                             type="button"
-                            onClick={() => setFotoAmpliada(foto.url_foto)}
+                            onClick={() => setFotoAmpliada(obtenerUrlFoto(foto.url_foto))}
                             className="group overflow-hidden rounded-ustay-card border border-slate-200 bg-slate-100 text-left"
                         >
                             <img
-                                src={foto.url_foto}
+                                src={obtenerUrlFoto(foto.url_foto)}
                                 alt={publicacion.titulo}
                                 className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105"
                             />
