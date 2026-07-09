@@ -144,25 +144,25 @@ export function ReporteComentarios() {
                   )}
                 </div>
 
-                {/* Fila inferior: Botones de acción (Mantener / Eliminar) */}
+                {/* Fila inferior: Botones de acción (Validar / Invalidar) */}
                 <div className="flex justify-end gap-0 rounded-xl overflow-hidden border border-slate-200 w-fit self-end shadow-sm mt-8">
-                  <button 
-                    onClick={() => manejarAccion(reporteActivo.id_reporte_com, "desestimado")}
-                    disabled={procesando}
-                    title="Mantener comentario (Rechazar reporte)"
-                    className="bg-green-100 hover:bg-green-200 text-green-600 px-8 py-3 transition-colors cursor-pointer border-r border-slate-200 flex items-center gap-2 font-medium disabled:opacity-50"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                    Mantener
-                  </button>
                   <button 
                     onClick={() => manejarAccion(reporteActivo.id_reporte_com, "confirmado")}
                     disabled={procesando}
-                    title="Eliminar comentario (Confirmar reporte)"
+                    title="Validar reporte (eliminar comentario)"
+                    className="bg-green-100 hover:bg-green-200 text-green-600 px-8 py-3 transition-colors cursor-pointer border-r border-slate-200 flex items-center gap-2 font-medium disabled:opacity-50"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    Validar
+                  </button>
+                  <button 
+                    onClick={() => manejarAccion(reporteActivo.id_reporte_com, "desestimado")}
+                    disabled={procesando}
+                    title="Invalidar reporte (mantener comentario)"
                     className="bg-red-100 hover:bg-red-200 text-red-500 px-8 py-3 transition-colors cursor-pointer flex items-center gap-2 font-medium disabled:opacity-50"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    Eliminar
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    Invalidar
                   </button>
                 </div>
               </>

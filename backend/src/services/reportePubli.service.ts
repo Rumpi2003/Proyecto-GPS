@@ -32,20 +32,17 @@ export class ReportePubliService {
       throw new Error("BAD_REQUEST: No puedes reportar tu propia publicación");
     }
 
-    // Regla de Negocio (RF_5): Límite de 30 días
-    const hace30Dias = new Date();
-    hace30Dias.setDate(hace30Dias.getDate() - 30);
-
-    const reportePrevio = await this.reporteRepo.findOne({
+    // Verificar si ya existe un reporte pendiente del mismo usuario sobre esta publicación
+    const reportePendiente = await this.reporteRepo.findOne({
       where: {
         usuario: { id_usuario },
         publicacion: { id_publicacion: publicacion.id_publicacion },
-        fecha_reporte: MoreThanOrEqual(hace30Dias),
+        estado: Estado.PENDIENTE,
       },
     });
 
-    if (reportePrevio) {
-      throw new Error('BAD_REQUEST: Ya has reportado esta publicación en los últimos 30 días');
+    if (reportePendiente) {
+      throw new Error('BAD_REQUEST: Ya existe un reporte pendiente para esta publicación');
     }
 
     const nuevoReporte = this.reporteRepo.create({
@@ -102,6 +99,18 @@ export class ReportePubliService {
         if (publicacion) {
             publicacion.estado = EstadoPublicacion.ELIMINADA; // o INACTIVA
             await this.publicacionRepo.save(publicacion);
+            
+            const id_publicacion = reporte.publicacion.id_publicacion; // Guardar ID antes de cambiar
+            
+            // Marcar todos los demás reportes PENDIENTES como CONFIRMADOS
+            await this.reporteRepo.update(
+              {
+                publicacion: { id_publicacion },
+                estado: Estado.PENDIENTE,
+              },
+              { estado: Estado.CONFIRMADO }
+            );
+            
             // TODO (RF_12): enviar notificación real por correo al publicador cuando exista servicio de email
             console.log(`ALERTA: La publicación ${publicacion.id_publicacion} alcanzó el límite de reportes confirmados en los últimos ${PERIODO_DIAS} días y ha sido dada de baja.`);
         }

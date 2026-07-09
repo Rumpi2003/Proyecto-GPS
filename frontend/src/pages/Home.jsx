@@ -114,11 +114,11 @@ export default function Home() {
 
           {/* Listado de Beneficios (Corregido el copy-paste del mockup) */}
           <div className="space-y-6 my-4">
-            <div className="flex items-start gap-5">
+            <div className="flex items-start gap-4 md:gap-5">
               <img
                 src={escudoUsuario}
                 alt="Publicaciones Verificadas"
-                className="w-10 h-10 p-2.5 bg-ustay-bg rounded-xl"
+                className="w-12 h-12 md:w-10 md:h-10 p-3 md:p-2.5 bg-ustay-bg rounded-xl shrink-0"
               />
               <div>
                 <h5 className="subtitulo">Publicaciones Verificadas</h5>
@@ -129,11 +129,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex items-start gap-5">
+            <div className="flex items-start gap-4 md:gap-5">
               <img
                 src={marcadorMapa}
                 alt="Ubicación Estratégica"
-                className="w-10 h-10 p-2.5 bg-ustay-bg rounded-xl"
+                className="w-12 h-12 md:w-10 md:h-10 p-3 md:p-2.5 bg-ustay-bg rounded-xl shrink-0"
               />
               <div>
                 <h5 className="subtitulo">Ubicación Estratégica</h5>
@@ -144,11 +144,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex items-start gap-5">
+            <div className="flex items-start gap-4 md:gap-5">
               <img
                 src={comentario}
                 alt="Comunidad Activa"
-                className="w-10 h-10 p-2.5 bg-ustay-bg rounded-xl"
+                className="w-12 h-12 md:w-10 md:h-10 p-3 md:p-2.5 bg-ustay-bg rounded-xl shrink-0"
               />
               <div>
                 <h5 className="subtitulo">Comunidad Activa</h5>
