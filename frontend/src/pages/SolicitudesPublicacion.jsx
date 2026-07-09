@@ -3,10 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { BarraInferior } from "../components/BarraInferior.jsx";
 import api from "../services/axios.config.js"; // Asegúrate de tener tu instancia de axios configurada
 
+function obtenerUrlFoto(url) {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  const base = import.meta.env.VITE_API_URL || "";
+  const apiBase = base.replace(/\/api\/?$/, "");
+  return apiBase ? `${apiBase}${url}` : url;
+}
+
 export default function SolicitudesPublicacion() {
   const navigate = useNavigate();
   const [publicaciones, setPublicaciones] = useState([]);
   const [seleccionada, setSeleccionada] = useState(null);
+  const [imagenAmpliada, setImagenAmpliada] = useState("");
   const [cargando, setCargando] = useState(true);
   const [procesando, setProcesando] = useState(false);
 
@@ -27,6 +36,17 @@ export default function SolicitudesPublicacion() {
 
   useEffect(() => {
     cargarPublicaciones();
+  }, []);
+
+  useEffect(() => {
+    function cerrarConEscape(evento) {
+      if (evento.key === "Escape") {
+        setImagenAmpliada("");
+      }
+    }
+
+    window.addEventListener("keydown", cerrarConEscape);
+    return () => window.removeEventListener("keydown", cerrarConEscape);
   }, []);
 
   // Función para cambiar el estado (Aceptar o Rechazar)
@@ -145,12 +165,20 @@ export default function SolicitudesPublicacion() {
 
                 {(() => {
                   const portada = seleccionada.fotos?.find((f) => f.es_portada) ?? seleccionada.fotos?.[0];
+                  const urlPortada = obtenerUrlFoto(portada?.url_foto);
                   return portada ? (
-                    <img
-                      src={portada.url_foto}
-                      alt="Portada de la publicación"
-                      className="h-40 w-full object-cover rounded-ustay-card"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => setImagenAmpliada(urlPortada)}
+                      className="block h-40 w-full overflow-hidden rounded-ustay-card focus:outline-none focus:ring-2 focus:ring-ustay-blue/40"
+                      title="Ver imagen completa"
+                    >
+                      <img
+                        src={urlPortada}
+                        alt="Portada de la publicación"
+                        className="h-full w-full object-cover transition-transform duration-200 hover:scale-[1.02]"
+                      />
+                    </button>
                   ) : (
                     <div className="h-40 bg-slate-200 rounded-ustay-card flex items-center justify-center texto text-ustay-muted">
                       Sin imagen
@@ -204,6 +232,32 @@ export default function SolicitudesPublicacion() {
           </div>
         </div>
       </main>
+
+      {imagenAmpliada && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 px-4 py-8 flex items-center justify-center"
+          onClick={() => setImagenAmpliada("")}
+        >
+          <div
+            className="relative w-full max-w-5xl max-h-full"
+            onClick={(evento) => evento.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setImagenAmpliada("")}
+              className="absolute -top-3 -right-3 z-10 rounded-full bg-white text-slate-700 shadow-lg w-10 h-10 flex items-center justify-center text-2xl leading-none hover:bg-slate-100"
+              aria-label="Cerrar imagen ampliada"
+            >
+              ×
+            </button>
+            <img
+              src={imagenAmpliada}
+              alt="Imagen ampliada de la publicación"
+              className="max-h-[85vh] w-full object-contain rounded-2xl bg-white shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
 
       <BarraInferior />
     </div>
