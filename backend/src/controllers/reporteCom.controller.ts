@@ -14,6 +14,28 @@ export async function obtenerReportesCom(req: Request, res: Response): Promise<v
   }
 }
 
+export async function obtenerMisReportesCom(req: Request, res: Response): Promise<void> {
+  try {
+    const id_usuario = req.user?.id;
+    if (!id_usuario) {
+      sendError(res, 'Usuario no autenticado', 401);
+      return;
+    }
+
+    const idsParam = req.query.ids as string;
+    if (!idsParam) {
+      sendSuccess(res, { comentarios_reportados: [] }, 'Reportes obtenidos');
+      return;
+    }
+
+    const ids = idsParam.split(',').map(Number).filter((n) => !isNaN(n) && n > 0);
+    const comentariosReportados = await reporteComService.obtenerMisReportes(id_usuario, ids);
+    sendSuccess(res, { comentarios_reportados: comentariosReportados }, 'Reportes obtenidos');
+  } catch (error: any) {
+    sendError(res, 'Error al obtener los reportes', 500);
+  }
+}
+
 export async function crearReporteCom(req: Request, res: Response): Promise<void> {
   try {
     const { error } = createReporteComSchema.validate(req.body, { abortEarly: false });

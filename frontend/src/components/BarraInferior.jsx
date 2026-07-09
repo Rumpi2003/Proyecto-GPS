@@ -1,8 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 import casaSvg from "../assets/iconos/casa.svg?raw";
 
 export const BarraInferior = () => {
+  const { role } = useAuth();
+  const homePath = role === "administrador" ? "/admin" : "/";
+
   const casaIcono = casaSvg
     .replace(/^.*?(<svg)/i, "$1")
     .replace("<svg", '<svg fill="#B6D5FE" width="28" height="28"');
@@ -18,7 +22,7 @@ export const BarraInferior = () => {
 
         {/* Casa de navegación — solo en mobile, centrada */}
         <Link
-          to="/"
+          to={homePath}
           className="lg:hidden active:scale-90 transition-transform leading-none"
           aria-label="Volver al inicio"
           dangerouslySetInnerHTML={{ __html: casaIcono }}

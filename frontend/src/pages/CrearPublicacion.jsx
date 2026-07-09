@@ -60,8 +60,13 @@ export default function CrearPublicacion() {
     setForm((prev) => ({ ...prev, [campo]: valor }));
   }
 
+  function handlePrecioChange(e) {
+    const filtrado = e.target.value.replace(/\D/g, "").slice(0, 12);
+    actualizar("precio", filtrado);
+  }
+
   function handleTelefonoChange(e) {
-    const filtrado = e.target.value.replace(/[^+\d\s]/g, "");
+    const filtrado = e.target.value.replace(/[^+\d\s]/g, "").slice(0, 20);
     actualizar("telefono", filtrado);
   }
 
@@ -104,7 +109,7 @@ export default function CrearPublicacion() {
         updateToken(resultado.token);
       }
 
-      navigate("/");
+      navigate("/mis-publicaciones");
     } catch (err) {
       const data = err?.response?.data;
       const msgs = Array.isArray(data?.message)
@@ -161,6 +166,7 @@ export default function CrearPublicacion() {
                 onChange={(e) => actualizar("titulo", e.target.value)}
                 placeholder="Ej: Departamento amoblado cerca de la UBB"
                 required
+                maxLength={50}
               />
 
               <BuscadorDireccion onPlaceSelect={handlePlaceSelect} />
@@ -175,9 +181,10 @@ export default function CrearPublicacion() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputField
                   label="Precio mensual"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={form.precio}
-                  onChange={(e) => actualizar("precio", e.target.value)}
+                  onChange={handlePrecioChange}
                   placeholder="$ 0"
                   required
                 />
@@ -198,6 +205,7 @@ export default function CrearPublicacion() {
                 placeholder="Describe el lugar, detalle habitaciones, servicios incluidos..."
                 textarea
                 required
+                maxLength={255}
               />
 
               <div className="flex items-center gap-3">

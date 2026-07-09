@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getComentariosByPublicacion } from "../services/comentario.service.js";
+import { obtenerMisReportesComentarios } from "../services/reporte.service.js";
 import banderaSvg from "../assets/iconos/bandera.svg?raw";
+import ModalReporteComentario from "./ModalReporteComentario.jsx";
 
 function IconBandera({ className }) {
   const html = banderaSvg
@@ -18,6 +20,8 @@ export default function ComentariosCard({ idPublicacion, permitirComentarios }) 
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [pagina, setPagina] = useState(1);
+  const [reportadosIds, setReportadosIds] = useState([]);
+  const [comentarioReporte, setComentarioReporte] = useState(null);
 
   useEffect(() => {
     if (!idPublicacion) return;
@@ -27,8 +31,16 @@ export default function ComentariosCard({ idPublicacion, permitirComentarios }) 
       setError(null);
       try {
         const data = await getComentariosByPublicacion(idPublicacion);
-        setComentarios(Array.isArray(data) ? data : []);
+        const comentariosArray = Array.isArray(data) ? data : [];
+        setComentarios(comentariosArray);
         setPagina(1);
+
+        // Cargar IDs de comentarios ya reportados por este usuario
+        if (comentariosArray.length > 0) {
+          const ids = comentariosArray.map((c) => c.id_comentario);
+          const reportados = await obtenerMisReportesComentarios(ids);
+          setReportadosIds(reportados);
+        }
       } catch (err) {
         const msg = err?.response?.data?.message?.[0] || err.message || "Error al cargar comentarios";
         setError(Array.isArray(msg) ? msg[0] : msg);
@@ -112,11 +124,14 @@ export default function ComentariosCard({ idPublicacion, permitirComentarios }) 
                   </span>
                   <button
                     type="button"
-                    title="Reportar comentario"
-                    className="w-7 h-7 rounded-full bg-delete-bg border-2 border-delete text-delete flex items-center justify-center hover:bg-red-100 transition-colors active:scale-[0.98]"
-                    onClick={() => {
-                      // TODO: Implementar reporte de comentario
-                    }}
+                    title={reportadosIds.includes(comentario.id_comentario) ? "Ya reportaste este comentario" : "Reportar comentario"}
+                    disabled={reportadosIds.includes(comentario.id_comentario)}
+                    className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      reportadosIds.includes(comentario.id_comentario)
+                        ? "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
+                        : "bg-delete-bg border-delete text-delete hover:bg-red-100 active:scale-[0.98]"
+                    }`}
+                    onClick={() => setComentarioReporte(comentario)}
                   >
                     <IconBandera className="w-[14px] h-[14px] flex items-center justify-center" />
                   </button>
@@ -158,6 +173,16 @@ export default function ComentariosCard({ idPublicacion, permitirComentarios }) 
           )}
         </>
       )}
+
+      {/* Modal de reporte */}
+      <ModalReporteComentario
+        isOpen={!!comentarioReporte}
+        comentario={comentarioReporte}
+        onClose={() => setComentarioReporte(null)}
+        onReportado={(comentario) => {
+          setReportadosIds((prev) => [...prev, comentario.id_comentario]);
+        }}
+      />
     </div>
   );
 }

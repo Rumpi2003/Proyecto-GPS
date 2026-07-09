@@ -124,8 +124,13 @@ export default function EditarPublicacion() {
     setForm((prev) => ({ ...prev, [campo]: valor }));
   }
 
+  function handlePrecioChange(e) {
+    const filtrado = e.target.value.replace(/\D/g, "").slice(0, 12);
+    actualizar("precio", filtrado);
+  }
+
   function handleTelefonoChange(e) {
-    const filtrado = e.target.value.replace(/[^+\d\s]/g, "");
+    const filtrado = e.target.value.replace(/[^+\d\s]/g, "").slice(0, 20);
     actualizar("telefono", filtrado);
   }
 
@@ -328,6 +333,7 @@ export default function EditarPublicacion() {
                 onChange={(e) => actualizar("titulo", e.target.value)}
                 placeholder="Ej: Departamento amoblado cerca de la UBB"
                 required
+                maxLength={50}
               />
 
               {/* Dirección — solo lectura */}
@@ -459,9 +465,10 @@ export default function EditarPublicacion() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputField
                   label="Precio mensual"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={form.precio}
-                  onChange={(e) => actualizar("precio", e.target.value)}
+                  onChange={handlePrecioChange}
                   placeholder="$ 0"
                   required
                 />
@@ -482,6 +489,7 @@ export default function EditarPublicacion() {
                 placeholder="Describe el lugar, detalle habitaciones, servicios incluidos..."
                 textarea
                 required
+                maxLength={255}
               />
 
               <div className="flex items-center gap-3">

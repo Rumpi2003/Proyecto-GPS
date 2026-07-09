@@ -2,7 +2,7 @@ import { AppDataSource } from '../config/db.config.js';
 import { ReporteComentario, EstadoReporte, MotivoComentario } from '../entities/reporteCom.entity.js';
 import { Usuario, Rol } from '../entities/usuario.entity.js';
 import { Comentario } from '../entities/comentario.entity.js';
-import { MoreThanOrEqual } from 'typeorm';
+import { In, MoreThanOrEqual } from 'typeorm';
 
 export type CrearReporteComData = {
   id_comentario: number;
@@ -64,6 +64,26 @@ export class ReporteComService {
     });
 
     return await this.reporteRepo.save(nuevoReporte);
+  }
+
+  async obtenerMisReportes(id_usuario: number, idsComentario: number[]): Promise<number[]> {
+    if (idsComentario.length === 0) return [];
+
+    const reportes = await this.reporteRepo.find({
+      where: {
+        usuario: { id_usuario },
+        comentario: { id_comentario: In(idsComentario) },
+        estado: EstadoReporte.PENDIENTE,
+      },
+      relations: ['comentario'],
+      select: {
+        comentario: {
+          id_comentario: true,
+        },
+      },
+    });
+
+    return reportes.map((r) => r.comentario.id_comentario);
   }
 
   async listarPendientes() {

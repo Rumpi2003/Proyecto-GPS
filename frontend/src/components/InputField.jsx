@@ -7,6 +7,7 @@ export default function InputField({
   error,
   textarea = false,
   required = false,
+  maxLength,
   className = "",
 }) {
   const baseClass =
@@ -27,6 +28,7 @@ export default function InputField({
           placeholder={placeholder}
           required={required}
           rows={4}
+          maxLength={maxLength}
           className={`${baseClass} resize-none`}
         />
       ) : (
@@ -36,6 +38,7 @@ export default function InputField({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
+          maxLength={maxLength}
           className={baseClass}
         />
       )}

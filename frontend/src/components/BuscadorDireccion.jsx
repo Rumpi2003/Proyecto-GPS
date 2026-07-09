@@ -246,15 +246,16 @@ export default function BuscadorDireccion({ onPlaceSelect }) {
       </label>
 
       <div ref={containerRef} className="relative">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
-          placeholder="Ej: Los Carrera 123, Concepción"
-          autoComplete="off"
+          <input
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+            onFocus={handleFocus}
+            placeholder="Ej: Los Carrera 123, Concepción"
+            autoComplete="off"
+            maxLength={200}
           className={`w-full border border-[#B6D5FE] rounded-[25px] bg-[#F3F4F6] px-4 py-2.5 font-['Poppins'] text-lg text-[#6B7280] outline-none transition-all duration-200 placeholder:text-[#9CA3AF] focus:border-[#3B82F6] focus:shadow-[0_0_0_1px_rgba(59,130,246,0.3)] ${
             isLoading ? "pr-10" : ""
           }`}
