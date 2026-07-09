@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useNavigate } from "react-router-dom"; // <-- Importamos useNavigate
 
 export const AuthModal = ({ isOpen, onClose }) => {
-  const { login, register } = useAuth();
+  const { login, register, user } = useAuth();
+  const navigate = useNavigate(); // <-- Inicializamos el hook
   const [mode, setMode] = useState("login");
   const [nombre, setNombre] = useState("");
   const [correo, setCorreo] = useState("");
@@ -34,17 +36,26 @@ export const AuthModal = ({ isOpen, onClose }) => {
     setError("");
     setIsSubmitting(true);
     try {
+      let usuarioLogueado;
+
       if (mode === "login") {
-        await login(correo, contraseña);
+        usuarioLogueado = await login(correo, contraseña);
       } else {
-        await register({ nombre, correo, contraseña });
+        usuarioLogueado = await register({ nombre, correo, contraseña });
       }
+
       resetForm();
       onClose();
+
+      // Preferir el rol devuelto por la llamada (inmediato). Si no está, usar el contexto.
+      const rol = usuarioLogueado?.rol ?? user?.rol;
+      if (rol === "administrador") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
-      setError(
-        err?.response?.data?.message || err.message || "Error inesperado",
-      );
+      setError(err?.response?.data?.message || err.message || "Error inesperado");
     } finally {
       setIsSubmitting(false);
     }

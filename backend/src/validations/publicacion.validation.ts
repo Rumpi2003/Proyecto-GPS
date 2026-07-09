@@ -55,7 +55,7 @@ export const updatePublicacionSchema = Joi.object({
     'string.pattern.base': 'El teléfono no es válido. Ejemplo esperado: +56 9 1234 5678',
   }),
   permitir_comentarios: Joi.boolean(),
-  estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA, Estado.ELIMINADA),
+  estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA),
   eliminar_fotos: Joi.array().items(Joi.number().integer().positive()).default([]),
   eliminar_etiquetas: Joi.array().items(Joi.number().integer().positive()).default([]),
   nuevas_etiquetas: Joi.array().items(Joi.number().integer().positive()).default([]),
@@ -82,4 +82,9 @@ export const filtrosPublicacionSchema = Joi.object({
   precio_max: Joi.number().min(0),
   valoracion_min: Joi.number().min(0).max(5),
   ids_etiquetas: Joi.string().pattern(/^\d+(,\d+)*$/),
+});
+
+export const adminUpdateEstadoPublicacionSchema = Joi.object({
+  estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA, Estado.ELIMINADA, Estado.RECHAZADA).required(),
+  motivo_rechazo: Joi.string().max(255).optional().allow(null, ''),
 });

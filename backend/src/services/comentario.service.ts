@@ -23,20 +23,13 @@ export class ComentarioService {
       throw new Error('BAD_REQUEST: Esta publicación tiene los comentarios deshabilitados');
     }
 
-    const comentarioExistente = await this.comentarioRepo.findOneBy({
-      id_usuario,
-      id_publicacion: data.id_publicacion,
-    });
+    // RF_3: no hay límite de comentarios por usuario/publicación, se permite comentar múltiples veces
 
-    if (comentarioExistente) {
-      throw new Error('BAD_REQUEST: Ya has comentado esta publicación');
-    }
-
-    // 3. Crear el comentario
+    // Crear el comentario
     const nuevoComentario = this.comentarioRepo.create({
-      id_usuario,
-      id_publicacion: data.id_publicacion,
-      texto: data.texto,
+      usuario: { id_usuario: id_usuario },
+      publicacion: { id_publicacion: data.id_publicacion },
+      texto: data.texto
     });
 
     return await this.comentarioRepo.save(nuevoComentario);
@@ -49,8 +42,9 @@ export class ComentarioService {
       throw new Error('NOT_FOUND: La publicación no existe');
     }
 
+    // CORRECCIÓN 3: Eliminar el 'where' duplicado y usar el parámetro 'id_publicacion'
     return await this.comentarioRepo.find({
-      where: { id_publicacion },
+      where: { publicacion: { id_publicacion: id_publicacion } },
       relations: ['usuario'], // Retornar los datos del usuario que comentó
       order: { fecha_comentario: 'DESC' }, // Los más recientes primero
     });
