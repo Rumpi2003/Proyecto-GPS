@@ -2,7 +2,7 @@ import { AppDataSource } from '../config/db.config.js';
 import { ReporteComentario, EstadoReporte, MotivoComentario } from '../entities/reporteCom.entity.js';
 import { Usuario, Rol } from '../entities/usuario.entity.js';
 import { Comentario } from '../entities/comentario.entity.js';
-import { In, MoreThanOrEqual } from 'typeorm';
+import { In } from 'typeorm';
 
 export type CrearReporteComData = {
   id_comentario: number;
@@ -37,20 +37,17 @@ export class ReporteComService {
       throw new Error('FORBIDDEN: Solo puedes reportar comentarios de tus propias publicaciones');
     }
 
-    // Regla de Negocio homóloga a RF_5
-    const hace30Dias = new Date();
-    hace30Dias.setDate(hace30Dias.getDate() - 30);
-
-    const reportePrevio = await this.reporteRepo.findOne({
+    // Verificar si ya existe un reporte pendiente del mismo usuario sobre este comentario
+    const reportePendiente = await this.reporteRepo.findOne({
       where: {
         usuario: { id_usuario },
         comentario: { id_comentario: comentario.id_comentario },
-        fecha_reporte: MoreThanOrEqual(hace30Dias),
+        estado: EstadoReporte.PENDIENTE,
       },
     });
 
-    if (reportePrevio) {
-      throw new Error('BAD_REQUEST: Ya has reportado este comentario en los últimos 30 días');
+    if (reportePendiente) {
+      throw new Error('BAD_REQUEST: Ya existe un reporte pendiente para este comentario');
     }
 
     const nuevoReporte = this.reporteRepo.create({
@@ -122,7 +119,18 @@ export class ReporteComService {
 
     // Si se confirma el reporte, el comentario se elimina por su carácter inapropiado
     if (nuevoEstado === EstadoReporte.CONFIRMADO) {
+      const id_comentario = reporte.comentario.id_comentario; // Guardar ID antes de eliminar
+      
       await this.comentarioRepo.remove(reporte.comentario);
+      
+      // Marcar todos los demás reportes PENDIENTES del mismo comentario como CONFIRMADOS
+      await this.reporteRepo.update(
+        {
+          comentario: { id_comentario },
+          estado: EstadoReporte.PENDIENTE,
+        },
+        { estado: EstadoReporte.CONFIRMADO }
+      );
     }
 
     return reporteGuardado;

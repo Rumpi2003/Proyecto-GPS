@@ -119,10 +119,10 @@ export default function ReportePublicaciones() {
               <>
                 <div className="space-y-2">
                   <label className="subtitulo !text-base text-ustay-text">Motivo del reporte:</label>
-                  <div className="bg-slate-50 border border-slate-200 rounded-ustay-card p-4 min-h-[100px]">
-                    <p className="texto text-ustay-muted text-sm capitalize">{reporteActivo.motivo}</p>
+                  <div className="bg-slate-50 border border-slate-200 rounded-ustay-card p-4 min-h-[100px] overflow-hidden">
+                    <p className="texto text-ustay-muted text-sm capitalize break-words">{reporteActivo.motivo}</p>
                     {reporteActivo.detalle && (
-                      <p className="texto text-ustay-muted text-sm mt-2">{reporteActivo.detalle}</p>
+                      <p className="texto text-ustay-muted text-sm mt-2 break-words">{reporteActivo.detalle}</p>
                     )}
                   </div>
                 </div>
@@ -142,23 +142,35 @@ export default function ReportePublicaciones() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-0 rounded-xl overflow-hidden border border-slate-200 w-fit self-end shadow-sm">
-                  <button
-                    onClick={() => manejarAccion(reporteActivo.id_reporte, "desestimado")}
-                    disabled={procesando}
-                    title="Desestimar reporte (mantener publicación)"
-                    className="bg-green-100 hover:bg-green-200 text-green-600 px-6 py-3 transition-colors cursor-pointer border-r border-slate-200 disabled:opacity-50"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                  </button>
+                <div className="flex items-center justify-between gap-4">
+                  {esIpSospechosa ? (
+                    <div className="bg-slate-600 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
+                      <svg className="w-4 h-4 text-red-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-poppins text-xs font-medium">IP {reporteActivo.ip_reporte} sospechosa</span>
+                    </div>
+                  ) : <div />}
+                  <div className="flex gap-0 rounded-xl overflow-hidden border border-slate-200 w-fit shadow-sm">
                   <button
                     onClick={() => manejarAccion(reporteActivo.id_reporte, "confirmado")}
                     disabled={procesando}
-                    title="Confirmar reporte"
-                    className="bg-red-100 hover:bg-red-200 text-red-500 px-6 py-3 transition-colors cursor-pointer disabled:opacity-50"
+                    title="Validar reporte (eliminar publicación)"
+                    className="bg-green-100 hover:bg-green-200 text-green-600 px-8 py-3 transition-colors cursor-pointer border-r border-slate-200 flex items-center gap-2 font-medium disabled:opacity-50"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    Validar
+                  </button>
+                  <button
+                    onClick={() => manejarAccion(reporteActivo.id_reporte, "desestimado")}
+                    disabled={procesando}
+                    title="Invalidar reporte (mantener publicación)"
+                    className="bg-red-100 hover:bg-red-200 text-red-500 px-8 py-3 transition-colors cursor-pointer flex items-center gap-2 font-medium disabled:opacity-50"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    Invalidar
                   </button>
+                  </div>
                 </div>
               </>
             ) : (
@@ -167,15 +179,7 @@ export default function ReportePublicaciones() {
           </div>
         </div>
 
-        {/* Alerta flotante dinámica evaluada con esIpSospechosa */}
-        {esIpSospechosa && (
-          <div className="absolute bottom-10 right-10 bg-slate-600 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-lg animate-fade-in">
-            <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            <span className="font-poppins text-sm font-medium">La IP {reporteActivo.ip_reporte} es sospechosa...</span>
-          </div>
-        )}
+
         
       </main>
 
