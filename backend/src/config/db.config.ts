@@ -11,7 +11,8 @@ import { CategoriaEtiqueta } from '../entities/categoriaEtiqueta.entity.js';
 import { Cercania } from '../entities/cercania.entity.js';
 import { Universidad } from '../entities/universidad.entity.js';
 import { Valoracion } from '../entities/valoracion.entity.js';
-import { Reporte } from '../entities/reporte.entity.js';
+import { ReportePubli } from '../entities/reportePubli.entity.js';
+import { ReporteComentario } from '../entities/reporteCom.entity.js';
 import { Foto } from '../entities/foto.entity.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,5 +35,5 @@ export const AppDataSource = new DataSource({
   database: getEnvVar('DB_NAME'),
   synchronize: true,
   migrations: ['dist/migrations/*.{js,mjs,cjs}'],
-  entities: [Usuario, Publicacion, Comentario, Etiqueta, CategoriaEtiqueta, Cercania, Universidad, Valoracion, Reporte, Foto],
+  entities: [Usuario, Publicacion, Comentario, Etiqueta, CategoriaEtiqueta, Cercania, Universidad, Valoracion, ReportePubli, ReporteComentario, Foto],
 });

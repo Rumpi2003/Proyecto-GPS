@@ -2,11 +2,13 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Publicacion } from './publicacion.entity.js';
 import { Comentario } from './comentario.entity.js';
 import { Valoracion } from './valoracion.entity.js';
-import { Reporte } from './reporte.entity.js';
+import { ReportePubli } from './reportePubli.entity.js';
+import { ReporteComentario } from './reporteCom.entity.js';
 import type { Publicacion as PublicacionType } from './publicacion.entity.js';
 import type { Comentario as ComentarioType } from './comentario.entity.js';
-import type { Valoracion as ValoracionType } from './valoracion.entity.js';
-import type { Reporte as ReporteType } from './reporte.entity.js';
+import type { ReportePubli as ReportePubliType } from './reportePubli.entity.js';
+import type { ReporteComentario as ReporteComentarioType } from './reporteCom.entity.js';
+import type { Valoracion as ValoracionType } from './valoracion.entity.js'
 
 export enum Rol {
   REGISTRADO = 'registrado',
@@ -43,6 +45,9 @@ export class Usuario {
   @OneToMany(() => Valoracion, (valoracion) => valoracion.usuario)
   valoraciones!: ValoracionType[];
 
-  @OneToMany(() => Reporte, (reporte) => reporte.usuario)
-  reportes!: ReporteType[];
+  @OneToMany(() => ReportePubli, (reportePubli) => reportePubli.usuario)
+  reportesPublicaciones!: ReportePubliType[];
+
+  @OneToMany(() => ReporteComentario, (reporteCom) => reporteCom.usuario)
+  reportesComentarios!: ReporteComentarioType[];
 }

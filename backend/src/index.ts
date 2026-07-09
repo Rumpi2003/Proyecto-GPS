@@ -95,124 +95,60 @@ AppDataSource.initialize()
     });
 
     // Se crean Categorías de Etiquetas según alcance del proyecto
-    await categoriaEtiquetaService.create({
-      nombre_categoria: 'genero',
-      es_excluyente: true,
-    });
-    await categoriaEtiquetaService.create({
-      nombre_categoria: 'propiedad',
-      es_excluyente: true,
-    });
-    await categoriaEtiquetaService.create({
-      nombre_categoria: 'servicio',
-      es_excluyente: false,
-    });
+    try {
+      await categoriaEtiquetaService.create({
+        nombre_categoria: 'genero',
+        es_excluyente: true,
+      });
+    } catch (e) {
+      console.log('Categoria genero: ', (e as Error).message);
+    }
 
-    // Se crean Etiquetas según alcance del proyecto
-    // Segun la categoría genero (id_categoria: 1)
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Solo Hombres',
-      url_icono: '/logos_etiquetas/genero/solo_hombres.svg',
-      id_categoria: 1,
-    });
+    try {
+      await categoriaEtiquetaService.create({
+        nombre_categoria: 'propiedad',
+        es_excluyente: true,
+      });
+    } catch (e) {
+      console.log('Categoria propiedad: ', (e as Error).message);
+    }
 
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Solo Mujeres',
-      url_icono: '/logos_etiquetas/genero/solo_mujeres.svg',
-      id_categoria: 1,
-    });
+    try {
+      await categoriaEtiquetaService.create({
+        nombre_categoria: 'servicio',
+        es_excluyente: false,
+      });
+    } catch (e) {
+      console.log('Categoria servicio: ', (e as Error).message);
+    }
 
-    // Segun la categoría propiedad (id_categoria: 2)
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Pieza',
-      url_icono: '/logos_etiquetas/propiedad/pieza.svg',
-      id_categoria: 2,
-    });
+    const etiquetas = [
+      { nombreEtiqueta: 'Solo Hombres', url_icono: '/logos_etiquetas/genero/solo_hombres.svg', id_categoria: 1 },
+      { nombreEtiqueta: 'Solo Mujeres', url_icono: '/logos_etiquetas/genero/solo_mujeres.svg', id_categoria: 1 },
+      { nombreEtiqueta: 'Pieza', url_icono: '/logos_etiquetas/propiedad/pieza.svg', id_categoria: 2 },
+      { nombreEtiqueta: 'Departamento', url_icono: '/logos_etiquetas/propiedad/departamento.svg', id_categoria: 2 },
+      { nombreEtiqueta: 'Pensión', url_icono: '/logos_etiquetas/propiedad/casa.svg', id_categoria: 2 },
+      { nombreEtiqueta: 'Residencia', url_icono: '/logos_etiquetas/propiedad/casa.svg', id_categoria: 2 },
+      { nombreEtiqueta: 'Casa', url_icono: '/logos_etiquetas/propiedad/casa.svg', id_categoria: 2 },
+      { nombreEtiqueta: 'Wi-fi alta velocidad', url_icono: '/logos_etiquetas/servicio/wifi_alta_velocidad.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Baño privado', url_icono: '/logos_etiquetas/servicio/baño_privado.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Amoblado', url_icono: '/logos_etiquetas/servicio/amoblado.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Calefacción', url_icono: '/logos_etiquetas/servicio/calefaccion.png', id_categoria: 3 },
+      { nombreEtiqueta: 'Lavandería', url_icono: '/logos_etiquetas/servicio/lavanderia.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Agua caliente', url_icono: '/logos_etiquetas/servicio/agua_caliente.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Cocina', url_icono: '/logos_etiquetas/servicio/cocina.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Parking', url_icono: '/logos_etiquetas/servicio/parking.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Aseo', url_icono: '/logos_etiquetas/servicio/aseo.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Pet-friendly', url_icono: '/logos_etiquetas/servicio/pet-friendly.svg', id_categoria: 3 },
+    ];
 
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Departamento',
-      url_icono: '/logos_etiquetas/propiedad/departamento.svg',
-      id_categoria: 2,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Pensión',
-      url_icono: '/logos_etiquetas/propiedad/casa.svg',
-      id_categoria: 2,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Residencia',
-      url_icono: '/logos_etiquetas/propiedad/casa.svg',
-      id_categoria: 2,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Casa',
-      url_icono: '/logos_etiquetas/propiedad/casa.svg',
-      id_categoria: 2,
-    });
-
-    // Segun la categoría servicio (id_categoria: 3)
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Wi-fi alta velocidad',
-      url_icono: '/logos_etiquetas/servicio/wifi_alta_velocidad.svg',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Baño privado',
-      url_icono: '/logos_etiquetas/servicio/baño_privado.svg',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Amoblado',
-      url_icono: '/logos_etiquetas/servicio/amoblado.svg',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Calefacción',
-      url_icono: '/logos_etiquetas/servicio/calefaccion.png',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Lavandería',
-      url_icono: '/logos_etiquetas/servicio/lavanderia.svg',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Agua caliente',
-      url_icono: '/logos_etiquetas/servicio/agua_caliente.svg',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Cocina',
-      url_icono: '/logos_etiquetas/servicio/cocina.svg',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Parking',
-      url_icono: '/logos_etiquetas/servicio/parking.svg',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Aseo',
-      url_icono: '/logos_etiquetas/servicio/aseo.svg',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Pet-friendly',
-      url_icono: '/logos_etiquetas/servicio/pet-friendly.svg',
-      id_categoria: 3,
-    });
+    for (const etiqueta of etiquetas) {
+      try {
+        await etiquetaService.createEtiqueta(etiqueta);
+      } catch (e) {
+        console.log(`Etiqueta ${etiqueta.nombreEtiqueta}:`, (e as Error).message);
+      }
+    }
 
     //==========admin inicial==========
     const adminCorreo = process.env.ADMIN_CORREO;

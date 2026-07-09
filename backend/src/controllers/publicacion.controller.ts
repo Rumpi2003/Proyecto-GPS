@@ -16,10 +16,12 @@ import {
     idUsuarioParamSchema,
     filtrosPublicacionSchema,
     toggleEstadoSchema,
+    adminUpdateEstadoPublicacionSchema,
 } from '../validations/publicacion.validation.js';
 
 const publicacionService = new PublicacionService();
 const etiquetaService = new EtiquetaService();
+const MOTIVO_RECHAZO_DEFAULT = 'Imágenes falsas o inadecuadas';
 
 /** Convierte JSON strings de multipart a valores reales */
 function parseMultipartBody(body: Record<string, unknown>) {
@@ -256,6 +258,24 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
             return;
         }
 
+        if (publicacion.estado !== Estado.ACTIVA && publicacion.estado !== Estado.INACTIVA) {
+            eliminarArchivosSubidos(req);
+            sendError(res, 'Solo puedes editar publicaciones ya aprobadas', 403);
+            return;
+        }
+
+        if (permitir_comentarios !== undefined && permitir_comentarios !== publicacion.permitir_comentarios) {
+            const ultimoCambio = publicacion.fecha_cambio_comentarios;
+            if (ultimoCambio) {
+                const horasTranscurridas = (Date.now() - new Date(ultimoCambio).getTime()) / (1000 * 60 * 60);
+                if (horasTranscurridas < 24) {
+                    eliminarArchivosSubidos(req);
+                    sendError(res, 'Solo puedes cambiar la configuración de comentarios una vez por día', 400);
+                    return;
+                }
+            }
+        }
+
         const datosActualizados: Partial<Publicacion> = {};
 
         // Solo guardar campos que REALMENTE cambiaron
@@ -263,7 +283,10 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
         if (descripcion !== undefined && descripcion !== publicacion.descripcion) datosActualizados.descripcion = descripcion;
         if (precio !== undefined && Number(precio) !== Number(publicacion.precio)) datosActualizados.precio = Number(precio);
         if (telefono !== undefined && telefono !== publicacion.telefono) datosActualizados.telefono = telefono;
-        if (permitir_comentarios !== undefined && permitir_comentarios !== publicacion.permitir_comentarios) datosActualizados.permitir_comentarios = permitir_comentarios;
+        if (permitir_comentarios !== undefined && permitir_comentarios !== publicacion.permitir_comentarios) {
+            datosActualizados.permitir_comentarios = permitir_comentarios;
+            datosActualizados.fecha_cambio_comentarios = new Date();
+        }
         if (estado !== undefined) datosActualizados.estado = estado;
 
         // Solo cambios visibles que sean DIFERENTES a lo actual justifican re‑revisión
@@ -370,7 +393,17 @@ export async function eliminarPublicacion(req: Request, res: Response): Promise<
             return;
         }
 
-        // Eliminar publicación (el service ya borra las fotos físicas)
+        const publicacion = await publicacionService.findOne(id);
+        if (!publicacion) {
+            sendError(res, 'Publicación no encontrada', 404);
+            return;
+        }
+
+        if (publicacion.estado !== Estado.ACTIVA && publicacion.estado !== Estado.INACTIVA) {
+            sendError(res, 'Solo puedes eliminar publicaciones ya aprobadas', 403);
+            return;
+        }
+
         await publicacionService.delete(id);
         sendSuccess(res, null, 'Publicación eliminada', 200);
     } catch (err) {
@@ -422,6 +455,11 @@ export async function toggleEstadoPublicacion(req: Request, res: Response): Prom
                 return;
             }
         } else {
+            if (publicacion.publicante.id_usuario !== req.user?.id) {
+                sendError(res, 'No tienes permisos para modificar esta publicación', 403);
+                return;
+            }
+
             // Dueño solo puede toggle entre activa ↔ inactiva
             if (publicacion.estado === Estado.PENDIENTE) {
                 sendError(res, 'No puedes cambiar el estado de una publicación en revisión', 400);
@@ -567,6 +605,68 @@ export async function obtenerPublicacionesInactivasUsuario(req: Request, res: Re
         sendSuccess(res, publicaciones, 'Publicaciones inactivas del usuario obtenidas', 200);
     } catch (err) {
         sendError(res, 'Error al obtener publicaciones inactivas del usuario', 500);
+    }
+}
+
+export async function obtenerPublicacionesPendientes(req: Request, res: Response): Promise<void> {
+    try {
+        const publicaciones = await publicacionService.findPendientes();
+        sendSuccess(res, publicaciones, 'Publicaciones pendientes obtenidas', 200);
+    } catch (err) {
+        sendError(res, 'Error al obtener publicaciones pendientes', 500);
+    }
+}
+
+export async function actualizarEstadoPublicacion(req: Request, res: Response): Promise<void> {
+    try {
+        const { error: paramsError, value: paramsValue } = idPublicacionParamSchema.validate(req.params, {
+            abortEarly: false,
+            stripUnknown: true,
+        });
+
+        const { error: bodyError, value: bodyValue } = adminUpdateEstadoPublicacionSchema.validate(req.body, {
+            abortEarly: false,
+            stripUnknown: true,
+        });
+
+        if (paramsError) {
+            sendError(res, paramsError.details.map((d) => d.message).join(', '), 400);
+            return;
+        }
+
+        if (bodyError) {
+            sendError(res, bodyError.details.map((d) => d.message).join(', '), 400);
+            return;
+        }
+
+        const id_publicacion = Number(paramsValue.id_publicacion);
+        if (Number.isNaN(id_publicacion)) {
+            sendError(res, 'id_publicación inválido', 400);
+            return;
+        }
+
+        const publicacion = await publicacionService.findOne(id_publicacion);
+        if (!publicacion) {
+            sendError(res, 'Publicación no encontrada', 404);
+            return;
+        }
+
+        const datosActualizados: Partial<Publicacion> = {
+            estado: bodyValue.estado,
+        };
+
+        if (bodyValue.estado === Estado.RECHAZADA) {
+            datosActualizados.motivo_rechazo = bodyValue.motivo_rechazo || MOTIVO_RECHAZO_DEFAULT;
+        }
+
+        if (bodyValue.estado === Estado.ACTIVA && publicacion.publicante.rol === Rol.REGISTRADO) {
+            await actualizar(publicacion.publicante.id_usuario, { rol: Rol.PUBLICANTE });
+        }
+
+        const actualizada = await publicacionService.update(id_publicacion, datosActualizados);
+        sendSuccess(res, actualizada, 'Estado de publicación actualizado', 200);
+    } catch (err) {
+        sendError(res, 'Error al actualizar el estado de la publicación', 500);
     }
 }
 

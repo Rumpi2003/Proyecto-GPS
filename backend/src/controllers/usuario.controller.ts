@@ -1,5 +1,6 @@
 import { type Request, type Response } from 'express';
 import * as usuarioService from '../services/usuario.service.js';
+import { encriptarContraseña } from '../services/auth.service.js';
 import { sendSuccess, sendError } from '../handlers/responseHandlers.js';
 import {
   createUsuarioSchema,
@@ -43,7 +44,14 @@ export async function crearUsuario(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const usuario = await usuarioService.crear(value);
+    const existente = await usuarioService.obtenerPorCorreo(value.correo);
+    if (existente) {
+      sendError(res, 'El correo ya está registrado', 409);
+      return;
+    }
+
+    const contraseñaEncriptada = await encriptarContraseña(value.contraseña);
+    const usuario = await usuarioService.crear({ ...value, contraseña: contraseñaEncriptada });
     sendSuccess(res, usuario, 'Usuario creado correctamente', 201);
   } catch (error) {
     sendError(res, 'Error al crear usuario');

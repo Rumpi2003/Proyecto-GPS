@@ -7,7 +7,7 @@ import {
   eliminarUsuario,
 } from '../controllers/usuario.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
-import { esAdmin } from '../middleware/esAdmin.js';
+import { esAdmin } from '../middleware/esAdmin.middleware.js';
 
 
 const router = Router();
