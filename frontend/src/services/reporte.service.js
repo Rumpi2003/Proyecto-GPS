@@ -7,6 +7,6 @@ export async function crearReporte(id_publicacion, motivo, detalle = "") {
         detalle: detalle?.trim() || null,
     };
 
-    const res = await api.post("/reportes", body);
+    const res = await api.post("/reportes-publicaciones", body);
     return res.data.data;
 }

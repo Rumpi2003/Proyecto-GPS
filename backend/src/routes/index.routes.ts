@@ -20,7 +20,7 @@ export default function routerApi(app: Application) {
     router.use('/publicaciones', publicacionRoutes);
     router.use('/comentarios', comentarioRoutes);
     router.use('/reportes-publicaciones', reportePubliRoutes);
-router.use('/reportes-comentarios', reporteComRoutes);
+    router.use('/reportes-comentarios', reporteComRoutes);
     router.use('/valoraciones', valoracionRoutes);
     router.use('/universidades', universidadRoutes);
     router.use('/etiquetas', etiquetaRoutes);
