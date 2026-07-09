@@ -8,6 +8,9 @@ import "./index.css";
 import Map from "./pages/Map.jsx";
 import Home from "./pages/Home.jsx";
 import HomeAdmin from "./pages/HomeAdmin.jsx";
+import SolicitudesPublicacion from "./pages/SolicitudesPublicacion.jsx";
+import ReportePublicaciones from "./pages/reportePublicaciones.jsx";
+import { ReporteComentarios } from "./pages/reporteComentario.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -33,7 +36,7 @@ createRoot(document.getElementById("root")).render(
             path="/admin/solicitudes" 
             element={
               <AdminRoute>
-                <div className="p-8">Vista de Solicitudes de Publicación (Próximamente)</div>
+                <SolicitudesPublicacion />
               </AdminRoute>
             } 
           />
@@ -41,7 +44,7 @@ createRoot(document.getElementById("root")).render(
             path="/admin/reportes-publicaciones" 
             element={
               <AdminRoute>
-                <div className="p-8">Vista de Reportes de Publicaciones (Próximamente)</div>
+                <ReportePublicaciones />
               </AdminRoute>
             } 
           />
@@ -49,7 +52,7 @@ createRoot(document.getElementById("root")).render(
             path="/admin/reportes-comentarios" 
             element={
               <AdminRoute>
-                <div className="p-8">Vista de Reportes de Comentarios (Próximamente)</div>
+                <ReporteComentarios />
               </AdminRoute>
             } 
           />

@@ -5,17 +5,22 @@ import { distanciaMinima } from "../middleware/distanciaMinima.middleware.js";
 import { direccionExiste } from "../middleware/direccionExistente.middleware.js";
 import { Usuario } from "../entities/usuario.entity.js";
 import { EtiquetaService } from "../services/etiqueta.service.js";
-import { type Publicacion } from "../entities/publicacion.entity.js";
+import { Estado, type Publicacion } from "../entities/publicacion.entity.js";
+import * as usuarioService from '../services/usuario.service.js';
+import { Rol } from '../entities/usuario.entity.js';
 import {
     createPublicacionSchema,
     updatePublicacionSchema,
     idPublicacionParamSchema,
     idUsuarioParamSchema,
     filtrosPublicacionSchema,
+    adminUpdateEstadoPublicacionSchema,
 } from '../validations/publicacion.validation.js';
 
 const publicacionService = new PublicacionService();
 const etiquetaService = new EtiquetaService();
+
+const MOTIVO_RECHAZO_DEFAULT = 'Imágenes falsas o inadecuadas';
 
 export async function crearPublicacion(req: Request, res: Response): Promise<void> {
     try {
@@ -160,13 +165,34 @@ export async function actualizarPublicacion(req: Request, res: Response): Promis
             return;
         }
 
+        // RF_7: Solo se puede editar una publicación ya aprobada (activa o inactiva)
+        if (publicacion.estado !== Estado.ACTIVA && publicacion.estado !== Estado.INACTIVA) {
+            sendError(res, 'Solo puedes editar publicaciones ya aprobadas', 403);
+            return;
+        }
+
+        // RF_9: Habilitar/deshabilitar comentarios solo una vez por día por publicación
+        if (permitir_comentarios !== undefined && permitir_comentarios !== publicacion.permitir_comentarios) {
+            const ultimoCambio = publicacion.fecha_cambio_comentarios;
+            if (ultimoCambio) {
+                const horasTranscurridas = (Date.now() - new Date(ultimoCambio).getTime()) / (1000 * 60 * 60);
+                if (horasTranscurridas < 24) {
+                    sendError(res, 'Solo puedes cambiar la configuración de comentarios una vez por día', 400);
+                    return;
+                }
+            }
+        }
+
         const datosActualizados: Partial<Publicacion> = {};
 
         if (titulo !== undefined) datosActualizados.titulo = titulo;
         if (descripcion !== undefined) datosActualizados.descripcion = descripcion;
         if (precio !== undefined) datosActualizados.precio = Number(precio);
         if (telefono !== undefined) datosActualizados.telefono = telefono;
-        if (permitir_comentarios !== undefined) datosActualizados.permitir_comentarios = permitir_comentarios;
+        if (permitir_comentarios !== undefined && permitir_comentarios !== publicacion.permitir_comentarios) {
+            datosActualizados.permitir_comentarios = permitir_comentarios;
+            datosActualizados.fecha_cambio_comentarios = new Date();
+        }
         if (estado !== undefined) datosActualizados.estado = estado;
         
         // Actualizar la publicación solo si hay cambios
@@ -236,6 +262,19 @@ export async function eliminarPublicacion(req: Request, res: Response): Promise<
 
         if(Number.isNaN(id)) {
             sendError(res, 'id_publicación inválido', 400);
+            return;
+        }
+
+        const publicacion = await publicacionService.findOne(id);
+
+        if (!publicacion) {
+            sendError(res, 'Publicación no encontrada', 404);
+            return;
+        }
+
+        // RF_7: Solo se puede eliminar una publicación ya aprobada (activa o inactiva)
+        if (publicacion.estado !== Estado.ACTIVA && publicacion.estado !== Estado.INACTIVA) {
+            sendError(res, 'Solo puedes eliminar publicaciones ya aprobadas', 403);
             return;
         }
 
@@ -372,5 +411,73 @@ export async function obtenerPublicacionesInactivasUsuario(req: Request, res: Re
         sendSuccess(res, publicaciones, 'Publicaciones inactivas del usuario obtenidas', 200);
     } catch (err) {
         sendError(res, 'Error al obtener publicaciones inactivas del usuario', 500);
+    }
+}
+
+export async function obtenerPublicacionesPendientes(req: Request, res: Response): Promise<void> {
+    try {
+        const publicaciones = await publicacionService.findPendientes();
+        sendSuccess(res, publicaciones, 'Publicaciones pendientes obtenidas', 200);
+    } catch (err) {
+        sendError(res, 'Error al obtener publicaciones pendientes', 500);
+    }
+}
+
+export async function actualizarEstadoPublicacion(req: Request, res: Response): Promise<void> {
+    try {
+        const { error: paramsError, value: paramsValue } = idPublicacionParamSchema.validate(req.params, {
+            abortEarly: false,
+            stripUnknown: true,
+        });
+
+        const { error: bodyError, value: bodyValue } = adminUpdateEstadoPublicacionSchema.validate(req.body, {
+            abortEarly: false,
+            stripUnknown: true,
+        });
+
+        if (paramsError) {
+            sendError(res, paramsError.details.map((d) => d.message).join(', '), 400);
+            return;
+        }
+
+        if (bodyError) {
+            sendError(res, bodyError.details.map((d) => d.message).join(', '), 400);
+            return;
+        }
+
+        const id_publicacion = Number(paramsValue.id_publicacion);
+
+        if (Number.isNaN(id_publicacion)) {
+            sendError(res, 'id_publicación inválido', 400);
+            return;
+        }
+
+        const publicacion = await publicacionService.findOne(id_publicacion);
+
+        if (!publicacion) {
+            sendError(res, 'Publicación no encontrada', 404);
+            return;
+        }
+
+        const datosActualizados: Partial<Publicacion> = {
+            estado: bodyValue.estado,
+        };
+
+        // RF_11: Al rechazar una solicitud se registra el motivo (por defecto uno predefinido)
+        if (bodyValue.estado === Estado.RECHAZADA) {
+            datosActualizados.motivo_rechazo = bodyValue.motivo_rechazo || MOTIVO_RECHAZO_DEFAULT;
+        }
+
+        // RF_6: Al aprobar la publicación, el usuario registrado pasa a ser publicador
+        // (se hace antes de refrescar la publicación para que la respuesta ya incluya el rol actualizado)
+        if (bodyValue.estado === Estado.ACTIVA && publicacion.publicante.rol === Rol.REGISTRADO) {
+            await usuarioService.actualizar(publicacion.publicante.id_usuario, { rol: Rol.PUBLICANTE });
+        }
+
+        const actualizada = await publicacionService.update(id_publicacion, datosActualizados);
+
+        sendSuccess(res, actualizada, 'Estado de publicación actualizado', 200);
+    } catch (err) {
+        sendError(res, 'Error al actualizar el estado de la publicación', 500);
     }
 }

@@ -13,26 +13,15 @@ export class ComentarioService {
       throw new Error('NOT_FOUND: La publicación no existe');
     }
 
-    // 2. Regla de Negocio (RF_9): Verificar si los comentarios están habilitados
+    // RF_9: Verificar si los comentarios están habilitados
     // Se asume que existe la propiedad 'permitir_comentarios' en la entidad Publicacion
     if (publicacion.permitir_comentarios === false) {
       throw new Error('BAD_REQUEST: Esta publicación tiene los comentarios deshabilitados');
     }
 
-    // CORRECCIÓN 1: Usar sintaxis relacional para la búsqueda
-    const comentarioExistente = await this.comentarioRepo.findOne({
-      where: {
-        usuario: { id_usuario: id_usuario },
-        publicacion: { id_publicacion: data.id_publicacion }
-      }
-    });
+    // RF_3: no hay límite de comentarios por usuario/publicación, se permite comentar múltiples veces
 
-    if (comentarioExistente) {
-      throw new Error('BAD_REQUEST: Ya has comentado esta publicación');
-    }
-
-    // 3. Crear el comentario
-    // CORRECCIÓN 2: Usar 'id_usuario' directamente, no 'data.id_usuario'
+    // Crear el comentario
     const nuevoComentario = this.comentarioRepo.create({
       usuario: { id_usuario: id_usuario },
       publicacion: { id_publicacion: data.id_publicacion },

@@ -84,7 +84,8 @@ export async function iniciarSesion(req: Request, res: Response): Promise<void> 
       path: '/',
     });
     
-    sendSuccess(res, { usuario, token }, 'Inicio de sesión exitoso');
+    const { contraseña: _contraseña, ...usuarioSeguro } = usuario;
+    sendSuccess(res, { usuario: usuarioSeguro, token }, 'Inicio de sesión exitoso');
   } catch {
     sendError(res, 'Error al iniciar sesión');
   }

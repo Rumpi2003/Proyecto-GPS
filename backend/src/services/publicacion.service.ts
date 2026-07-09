@@ -15,6 +15,17 @@ type PublicacionFiltros = {
     valoracion_min?: number;
 }
 
+// Select seguro para no exponer el hash de la contraseña del publicante en las respuestas
+const PUBLICANTE_SELECT = {
+    publicante: {
+        id_usuario: true as const,
+        nombre: true as const,
+        correo: true as const,
+        rol: true as const,
+        fecha_registro: true as const,
+    },
+};
+
 export class PublicacionService {
     // CRUDs para manejar las publicaciones
     
@@ -78,6 +89,7 @@ export class PublicacionService {
         return this.repository.findOne({
             where: { id_publicacion },
             relations: ['publicante', 'etiquetas', 'fotos'],
+            select: PUBLICANTE_SELECT,
         });
     }
 
@@ -85,6 +97,7 @@ export class PublicacionService {
         return this.repository.find({
             where: { publicante: { id_usuario: id_publicante} },
             relations: ['publicante', 'etiquetas', 'fotos'],
+            select: PUBLICANTE_SELECT,
         });
     }
 
@@ -95,6 +108,7 @@ export class PublicacionService {
                 estado: Estado.ACTIVA,
              },
             relations: ['publicante', 'etiquetas', 'fotos'],
+            select: PUBLICANTE_SELECT,
         });
     }
 
@@ -105,6 +119,16 @@ export class PublicacionService {
                 estado: Estado.INACTIVA,
              },
             relations: ['publicante', 'etiquetas', 'fotos'],
+            select: PUBLICANTE_SELECT,
+        });
+    }
+
+    async findPendientes() {
+        return this.repository.find({
+            where: { estado: Estado.PENDIENTE },
+            relations: ['publicante', 'etiquetas', 'fotos'],
+            select: PUBLICANTE_SELECT,
+            order: { fecha_publicacion: 'DESC' },
         });
     }
 
@@ -116,6 +140,7 @@ export class PublicacionService {
         return this.repository.findOne({
             where: { id_publicacion },
             relations: ['publicante', 'etiquetas', 'fotos'],
+            select: PUBLICANTE_SELECT,
         });
     }
 

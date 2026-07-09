@@ -19,7 +19,7 @@ export const updatePublicacionSchema = Joi.object({
   precio: Joi.number().integer().min(0),
   telefono: Joi.string().trim().min(7).max(20),
   permitir_comentarios: Joi.boolean(),
-  estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA, Estado.ELIMINADA),
+  estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA),
   eliminar_fotos: Joi.array().items(Joi.number().integer().positive()).default([]),
   nuevas_fotos: Joi.array().items(Joi.string().uri()).default([]),
   eliminar_etiquetas: Joi.array().items(Joi.number().integer().positive()).default([]),
@@ -40,4 +40,9 @@ export const filtrosPublicacionSchema = Joi.object({
   precio_max: Joi.number().min(0),
   valoracion_min: Joi.number().min(0).max(5),
   ids_etiquetas: Joi.string().pattern(/^\d+(,\d+)*$/),
+});
+
+export const adminUpdateEstadoPublicacionSchema = Joi.object({
+  estado: Joi.string().valid(Estado.ACTIVA, Estado.INACTIVA, Estado.ELIMINADA, Estado.RECHAZADA).required(),
+  motivo_rechazo: Joi.string().max(255).optional().allow(null, ''),
 });

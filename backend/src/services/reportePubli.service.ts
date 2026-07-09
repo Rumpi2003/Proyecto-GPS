@@ -53,6 +53,14 @@ export class ReportePubliService {
     return await this.reporteRepo.save(nuevoReporte);
   }
 
+  async listarPendientes() {
+    return this.reporteRepo.find({
+      where: { estado: Estado.PENDIENTE },
+      relations: ['publicacion'],
+      order: { fecha_reporte: 'DESC' },
+    });
+  }
+
   async evaluar(id_reporte: number, nuevoEstado: Estado) {
     const reporte = await this.reporteRepo.findOne({
       where: { id_reporte },
@@ -67,11 +75,16 @@ export class ReportePubliService {
     // Regla de Negocio (RF_12): Acumulación de reportes y baja
     if (nuevoEstado === Estado.CONFIRMADO) { 
       const LIMITE_REPORTES = 5;
-      
+      const PERIODO_DIAS = 30;
+
+      const desde = new Date();
+      desde.setDate(desde.getDate() - PERIODO_DIAS);
+
       const reportesConfirmados = await this.reporteRepo.count({
         where: {
           publicacion: { id_publicacion: reporte.publicacion.id_publicacion },
           estado: Estado.CONFIRMADO,
+          fecha_reporte: MoreThanOrEqual(desde),
         },
       });
 
@@ -81,10 +94,15 @@ export class ReportePubliService {
         if (publicacion) {
             publicacion.estado = EstadoPublicacion.ELIMINADA; // o INACTIVA
             await this.publicacionRepo.save(publicacion);
-            console.log(`ALERTA: La publicación ${publicacion.id_publicacion} alcanzó el límite de reportes y ha sido dada de baja.`);
+            // TODO (RF_12): enviar notificación real por correo al publicador cuando exista servicio de email
+            console.log(`ALERTA: La publicación ${publicacion.id_publicacion} alcanzó el límite de reportes confirmados en los últimos ${PERIODO_DIAS} días y ha sido dada de baja.`);
         }
+      } else {
+        // TODO (RF_12): enviar notificación real por correo al publicador con el motivo del reporte confirmado
+        console.log(`NOTIFICACIÓN: Se confirmó un reporte (motivo: ${reporte.motivo}) para la publicación ${reporte.publicacion.id_publicacion}.`);
       }
     }
+
 
     return reporte;
   }

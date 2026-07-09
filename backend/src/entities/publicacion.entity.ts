@@ -19,6 +19,7 @@ ACTIVA = 'activa',
 INACTIVA = 'inactiva',
 ELIMINADA = 'eliminada',
 PENDIENTE = 'pendiente',
+RECHAZADA = 'rechazada',
 }
 
 @Entity({ name: 'publicacion' })
@@ -50,6 +51,12 @@ export class Publicacion {
 
 	@Column({ type: 'enum', enum: Estado, default: Estado.PENDIENTE })
 	estado!: Estado;
+
+	@Column({ name: 'motivo_rechazo', type: 'varchar', length: 255, nullable: true })
+	motivo_rechazo!: string | null;
+
+	@Column({ name: 'fecha_cambio_comentarios', type: 'timestamp', nullable: true })
+	fecha_cambio_comentarios!: Date | null;
 
 	@Column({ type: 'varchar', length: 255 })
 	direccion!: string;

@@ -86,124 +86,94 @@ AppDataSource.initialize()
     });
 
     // Se crean Categorías de Etiquetas según alcance del proyecto
-    await categoriaEtiquetaService.create({
-      nombre_categoria: 'genero',
-      es_excluyente: true,
-    });
-    await categoriaEtiquetaService.create({
-      nombre_categoria: 'propiedad',
-      es_excluyente: true,
-    });
-    await categoriaEtiquetaService.create({
-      nombre_categoria: 'servicio',
-      es_excluyente: false,
-    });
+    try {
+      await categoriaEtiquetaService.create({
+        nombre_categoria: 'genero',
+        es_excluyente: true,
+      });
+    } catch (e) {
+      console.log('Categoria genero: ', (e as Error).message);
+    }
+
+    try {
+      await categoriaEtiquetaService.create({
+        nombre_categoria: 'propiedad',
+        es_excluyente: true,
+      });
+    } catch (e) {
+      console.log('Categoria propiedad: ', (e as Error).message);
+    }
+
+    try {
+      await categoriaEtiquetaService.create({
+        nombre_categoria: 'servicio',
+        es_excluyente: false,
+      });
+    } catch (e) {
+      console.log('Categoria servicio: ', (e as Error).message);
+    }
 
     // Se crean Etiquetas según alcance del proyecto
     // Segun la categoría genero (id_categoria: 1)
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Solo Hombres',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 1,
-    });
+    try {
+      await etiquetaService.createEtiqueta({
+        nombreEtiqueta: 'Solo Hombres',
+        url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+        id_categoria: 1,
+      });
+    } catch (e) {
+      console.log('Etiqueta Solo Hombres:', (e as Error).message);
+    }
 
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Solo Mujeres',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 1,
-    });
+    try {
+      await etiquetaService.createEtiqueta({
+        nombreEtiqueta: 'Solo Mujeres',
+        url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+        id_categoria: 1,
+      });
+    } catch (e) {
+      console.log('Etiqueta Solo Mujeres:', (e as Error).message);
+    }
 
     // Segun la categoría propiedad (id_categoria: 2)
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Pieza',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 2,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Departamento',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 2,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Pensión',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 2,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Residencia',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 2,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Casa',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 2,
-    });
+    const propiedadLabels = ['Pieza','Departamento','Pensión','Residencia','Casa'];
+    for (const nombre of propiedadLabels) {
+      try {
+        await etiquetaService.createEtiqueta({
+          nombreEtiqueta: nombre,
+          url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+          id_categoria: 2,
+        });
+      } catch (e) {
+        console.log(`Etiqueta ${nombre}:`, (e as Error).message);
+      }
+    }
 
     // Segun la categoría servicio (id_categoria: 3)
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Wi-fi alta velocidad',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 3,
-    });
+    const servicioLabels = [
+      'Wi-fi alta velocidad',
+      'Baño privado',
+      'Amoblado',
+      'Calefacción',
+      'Lavandería',
+      'Agua caliente',
+      'Cocina',
+      'Parking',
+      'Aseo',
+      'Pet-friendly',
+    ];
 
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Baño privado',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Amoblado',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Calefacción',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Lavandería',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Agua caliente',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Cocina',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Parking',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Aseo',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 3,
-    });
-
-    await etiquetaService.createEtiqueta({
-      nombreEtiqueta: 'Pet-friendly',
-      url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-      id_categoria: 3,
-    });
+    for (const nombre of servicioLabels) {
+      try {
+        await etiquetaService.createEtiqueta({
+          nombreEtiqueta: nombre,
+          url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+          id_categoria: 3,
+        });
+      } catch (e) {
+        console.log(`Etiqueta ${nombre}:`, (e as Error).message);
+      }
+    }
 
     //==========admin inicial==========
     const adminCorreo = process.env.ADMIN_CORREO;

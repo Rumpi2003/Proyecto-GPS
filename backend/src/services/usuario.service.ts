@@ -4,25 +4,32 @@ import { encriptarContraseña } from './auth.service.js';
 
 const usuarioRepository = AppDataSource.getRepository(Usuario);
 
-export async function obtenerTodos(): Promise<Usuario[]> {
-  return await usuarioRepository.find();
+// Campos seguros para exponer en la API (nunca se devuelve el hash de la contraseña)
+const SAFE_SELECT: (keyof Usuario)[] = ['id_usuario', 'correo', 'nombre', 'rol', 'fecha_registro'];
+
+export async function obtenerTodos(): Promise<Omit<Usuario, 'contraseña'>[]> {
+  return await usuarioRepository.find({ select: SAFE_SELECT });
 }
 
-export async function obtenerPorId(id: number): Promise<Usuario | null> {
-  return await usuarioRepository.findOneBy({ id_usuario: id });
+export async function obtenerPorId(id: number): Promise<Omit<Usuario, 'contraseña'> | null> {
+  return await usuarioRepository.findOne({ where: { id_usuario: id }, select: SAFE_SELECT });
 }
 
-export async function crear(data: Partial<Usuario>): Promise<Usuario> {
+export async function crear(data: Partial<Usuario>): Promise<Omit<Usuario, 'contraseña'>> {
   const usuario = usuarioRepository.create(data);
-  return await usuarioRepository.save(usuario);
+  const guardado = await usuarioRepository.save(usuario);
+  const { contraseña, ...usuarioSeguro } = guardado;
+  return usuarioSeguro;
 }
 
-export async function actualizar(id: number, data: Partial<Usuario>): Promise<Usuario | null> {
-  const usuario = await obtenerPorId(id);
+export async function actualizar(id: number, data: Partial<Usuario>): Promise<Omit<Usuario, 'contraseña'> | null> {
+  const usuario = await usuarioRepository.findOneBy({ id_usuario: id });
   if (!usuario) return null;
 
   usuarioRepository.merge(usuario, data);
-  return await usuarioRepository.save(usuario);
+  const guardado = await usuarioRepository.save(usuario);
+  const { contraseña, ...usuarioSeguro } = guardado;
+  return usuarioSeguro;
 }
 
 export async function eliminar(id: number): Promise<boolean> {

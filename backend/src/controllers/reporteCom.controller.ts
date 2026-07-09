@@ -5,6 +5,15 @@ import { ReporteComService } from '../services/reporteCom.service.js';
 
 const reporteComService = new ReporteComService();
 
+export async function obtenerReportesCom(req: Request, res: Response): Promise<void> {
+  try {
+    const reportes = await reporteComService.listarPendientes();
+    sendSuccess(res, reportes, 'Reportes de comentarios obtenidos', 200);
+  } catch (error: any) {
+    sendError(res, 'Error al obtener los reportes de comentarios', 500);
+  }
+}
+
 export async function crearReporteCom(req: Request, res: Response): Promise<void> {
   try {
     const { error } = createReporteComSchema.validate(req.body, { abortEarly: false });
@@ -40,8 +49,9 @@ export async function crearReporteCom(req: Request, res: Response): Promise<void
 
     if (message.includes('NOT_FOUND:')) statusCode = 404;
     else if (message.includes('BAD_REQUEST:')) statusCode = 400;
+    else if (message.includes('FORBIDDEN:')) statusCode = 403;
 
-    const cleanMessage = message.replace(/NOT_FOUND:|BAD_REQUEST:/g, '').trim();
+    const cleanMessage = message.replace(/NOT_FOUND:|BAD_REQUEST:|FORBIDDEN:/g, '').trim();
     sendError(res, cleanMessage, statusCode);
   }
 }

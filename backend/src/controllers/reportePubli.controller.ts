@@ -5,6 +5,15 @@ import { ReportePubliService } from '../services/reportePubli.service.js';
 
 const reportePubliService = new ReportePubliService();
 
+export async function obtenerReportesPubli(req: Request, res: Response): Promise<void> {
+  try {
+    const reportes = await reportePubliService.listarPendientes();
+    sendSuccess(res, reportes, 'Reportes de publicaciones obtenidos', 200);
+  } catch (error: any) {
+    sendError(res, 'Error al obtener los reportes de publicaciones', 500);
+  }
+}
+
 export async function crearReportePubli(req: Request, res: Response): Promise<void> {
   try {
     const { error } = createReportePubliSchema.validate(req.body, { abortEarly: false });
