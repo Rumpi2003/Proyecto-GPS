@@ -46,7 +46,7 @@ export class EtiquetaService {
         });
 
         if (etiquetaExistente) {
-            throw new Error("La etiqueta ya existe en la categoría especificada");
+            return etiquetaExistente;
         }
 
         const etiqueta = this.repository.create({

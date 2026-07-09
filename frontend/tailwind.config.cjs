@@ -6,10 +6,21 @@ module.exports = {
         ustay: {
           blue: "#2b82ea",
           "blue-dark": "#1a6fd3",
+          "light-border": "#B6D5FE",
           bg: "#e3effd",
           card: "#f4f7fc",
           text: "#1e293b",
           muted: "#64748b",
+        },
+        edit: {
+          DEFAULT: "#D3723C",
+          bg: "#FFEDD5",
+          "bg-hover": "#E29578",
+        },
+        delete: {
+          DEFAULT: "#991B1B",
+          bg: "#FEE2E2",
+          "bg-hover": "#E57373",
         },
         danger: {
           low: "#fef2f2",

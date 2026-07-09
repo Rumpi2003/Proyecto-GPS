@@ -2,6 +2,12 @@ import { AppDataSource } from "../config/db.config.js";
 import { Publicacion, Estado } from "../entities/publicacion.entity.js"
 import { Cercania } from "../entities/cercania.entity.js"
 import { Foto } from "../entities/foto.entity.js"
+import { unlink } from 'fs/promises';
+import { resolve, basename, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const publicacionRepository = AppDataSource.getRepository(Publicacion);
 const cercaniaRepository = AppDataSource.getRepository(Cercania);
@@ -15,7 +21,6 @@ type PublicacionFiltros = {
     valoracion_min?: number;
 }
 
-// Select seguro para no exponer el hash de la contraseña del publicante en las respuestas
 const PUBLICANTE_SELECT = {
     publicante: {
         id_usuario: true as const,
@@ -25,6 +30,21 @@ const PUBLICANTE_SELECT = {
         fecha_registro: true as const,
     },
 };
+
+/** Convierte una url_foto de BD (ej: /uploads/abc.jpg) a la ruta absoluta en disco */
+function rataAbsolutaFoto(url_foto: string): string {
+    const archivo = basename(url_foto);
+    return resolve(__dirname, '../../uploads', archivo);
+}
+
+/** Borra un archivo físico si existe, ignora si no está */
+async function borrarArchivo(url_foto: string): Promise<void> {
+    try {
+        await unlink(rataAbsolutaFoto(url_foto));
+    } catch {
+        // El archivo ya no existe, no es un error
+    }
+}
 
 export class PublicacionService {
     // CRUDs para manejar las publicaciones
@@ -88,15 +108,29 @@ export class PublicacionService {
     async findOne(id_publicacion: number) {
         return this.repository.findOne({
             where: { id_publicacion },
-            relations: ['publicante', 'etiquetas', 'fotos'],
+            relations: ['publicante', 'etiquetas', 'fotos', 'cercanias', 'cercanias.universidad'],
             select: PUBLICANTE_SELECT,
+        });
+    }
+
+    async findOneDetalle(id_publicacion: number) {
+        return this.repository.findOne({
+            where: { id_publicacion },
+            relations: [
+                'publicante',
+                'etiquetas',
+                'fotos',
+                'comentarios',
+                'comentarios.usuario',
+                'cercanias',
+                'cercanias.universidad',]
         });
     }
 
     async findByPublicante(id_publicante: number) {
         return this.repository.find({
             where: { publicante: { id_usuario: id_publicante} },
-            relations: ['publicante', 'etiquetas', 'fotos'],
+            relations: ['publicante', 'etiquetas', 'fotos', 'cercanias', 'cercanias.universidad'],
             select: PUBLICANTE_SELECT,
         });
     }
@@ -107,8 +141,8 @@ export class PublicacionService {
                  publicante: { id_usuario: id_publicante},
                 estado: Estado.ACTIVA,
              },
-            relations: ['publicante', 'etiquetas', 'fotos'],
-            select: PUBLICANTE_SELECT,
+            relations: ['publicante', 'etiquetas', 'fotos', 'cercanias'],
+             select: PUBLICANTE_SELECT,
         });
     }
 
@@ -118,17 +152,17 @@ export class PublicacionService {
                  publicante: { id_usuario: id_publicante},
                 estado: Estado.INACTIVA,
              },
-            relations: ['publicante', 'etiquetas', 'fotos'],
-            select: PUBLICANTE_SELECT,
+            relations: ['publicante', 'etiquetas', 'fotos', 'cercanias'],
+             select: PUBLICANTE_SELECT,
         });
     }
 
     async findPendientes() {
         return this.repository.find({
-            where: { estado: Estado.PENDIENTE },
-            relations: ['publicante', 'etiquetas', 'fotos'],
-            select: PUBLICANTE_SELECT,
-            order: { fecha_publicacion: 'DESC' },
+             where: { estado: Estado.PENDIENTE },
+             relations: ['publicante', 'etiquetas', 'fotos'],
+             select: PUBLICANTE_SELECT,
+             order: { fecha_publicacion: 'DESC' },
         });
     }
 
@@ -145,8 +179,17 @@ export class PublicacionService {
     }
 
     async delete(id_publicacion: number) {
-        const publicacion = await this.repository.findOneBy({ id_publicacion });
+        const publicacion = await this.repository.findOne({
+            where: { id_publicacion },
+            relations: ['fotos'],
+        });
         if (!publicacion) throw new Error('Publicacion no encontrada');
+
+        // Borrar archivos físicos antes de eliminar la publicación
+        for (const foto of publicacion.fotos ?? []) {
+            await borrarArchivo(foto.url_foto);
+        }
+
         return this.repository.remove(publicacion);
     }
 
@@ -180,16 +223,10 @@ export class PublicacionService {
     async removeFoto(id_foto: number) {
         const foto = await fotoRepository.findOneBy({ id_foto });
         if (!foto) throw new Error('Foto no encontrada');
+
+        // Borrar archivo físico antes de eliminar el registro
+        await borrarArchivo(foto.url_foto);
+
         return fotoRepository.remove(foto);
     }
 }
-
-// Middlewares necesarios para publicaciones:
-// 1.De autenticación para que solo un usuario registrado o publicador las pueda crear
-// 2.De negocio para ver que la dirección ([calle] [número], [comuna]) no se repita con otra.
-// 3.De negocio para verificar que la dirección que se ingreso este a una distancia mínima de una
-// universidad registrada.
-
-// Flujo para la creación de una publicación:
-// 1.El usuario ingresa la dirección y se verifica que esta cumpla con las reglas de negocio.
-// 2.El usuario ingresa los campos (titulo, contacto, descripción, etc), las fotos y las etiquetas.

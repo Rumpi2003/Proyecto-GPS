@@ -15,4 +15,11 @@ body {
   .texto {
     @apply font-poppins text-texto text-type-body;
   }
+
+  .line-clamp-2-custom {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  }
 }

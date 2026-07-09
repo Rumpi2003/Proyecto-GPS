@@ -19,7 +19,7 @@ export class CategoriaEtiquetaService {
         });
 
         if (existente) {
-            throw new Error('La categoría ya existe');
+            return existente;
         }
 
         const categoria = this.repository.create({

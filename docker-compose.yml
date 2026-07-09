@@ -36,6 +36,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    volumes:
+      - uploads-data:/app/uploads
     environment:
       BACKEND_PORT: 5000
       JWT_SECRET: ${JWT_SECRET}
@@ -70,3 +72,4 @@ services:
 
 volumes:
   db-data:
+  uploads-data:

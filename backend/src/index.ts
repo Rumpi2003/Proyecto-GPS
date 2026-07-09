@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import routerApi from './routes/index.routes.js';
 import { AppDataSource } from './config/db.config.js';
 import { UniversidadService } from './services/universidad.service.js';
@@ -17,6 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 dotenv.config({ path: resolve(__dirname, '../../.env') });
+dotenv.config({ path: resolve(__dirname, '../../.env.local'), override: true });
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 5000;
@@ -44,6 +46,13 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(cookieParser());
+
+// Crear carpeta uploads si no existe y servir archivos estáticos
+const uploadsDir = resolve(__dirname, '../uploads');
+if (!existsSync(uploadsDir)) {
+  mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
 
 routerApi(app);
 
@@ -113,65 +122,31 @@ AppDataSource.initialize()
       console.log('Categoria servicio: ', (e as Error).message);
     }
 
-    // Se crean Etiquetas según alcance del proyecto
-    // Segun la categoría genero (id_categoria: 1)
-    try {
-      await etiquetaService.createEtiqueta({
-        nombreEtiqueta: 'Solo Hombres',
-        url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-        id_categoria: 1,
-      });
-    } catch (e) {
-      console.log('Etiqueta Solo Hombres:', (e as Error).message);
-    }
-
-    try {
-      await etiquetaService.createEtiqueta({
-        nombreEtiqueta: 'Solo Mujeres',
-        url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-        id_categoria: 1,
-      });
-    } catch (e) {
-      console.log('Etiqueta Solo Mujeres:', (e as Error).message);
-    }
-
-    // Segun la categoría propiedad (id_categoria: 2)
-    const propiedadLabels = ['Pieza','Departamento','Pensión','Residencia','Casa'];
-    for (const nombre of propiedadLabels) {
-      try {
-        await etiquetaService.createEtiqueta({
-          nombreEtiqueta: nombre,
-          url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-          id_categoria: 2,
-        });
-      } catch (e) {
-        console.log(`Etiqueta ${nombre}:`, (e as Error).message);
-      }
-    }
-
-    // Segun la categoría servicio (id_categoria: 3)
-    const servicioLabels = [
-      'Wi-fi alta velocidad',
-      'Baño privado',
-      'Amoblado',
-      'Calefacción',
-      'Lavandería',
-      'Agua caliente',
-      'Cocina',
-      'Parking',
-      'Aseo',
-      'Pet-friendly',
+    const etiquetas = [
+      { nombreEtiqueta: 'Solo Hombres', url_icono: '/logos_etiquetas/genero/solo_hombres.svg', id_categoria: 1 },
+      { nombreEtiqueta: 'Solo Mujeres', url_icono: '/logos_etiquetas/genero/solo_mujeres.svg', id_categoria: 1 },
+      { nombreEtiqueta: 'Pieza', url_icono: '/logos_etiquetas/propiedad/pieza.svg', id_categoria: 2 },
+      { nombreEtiqueta: 'Departamento', url_icono: '/logos_etiquetas/propiedad/departamento.svg', id_categoria: 2 },
+      { nombreEtiqueta: 'Pensión', url_icono: '/logos_etiquetas/propiedad/casa.svg', id_categoria: 2 },
+      { nombreEtiqueta: 'Residencia', url_icono: '/logos_etiquetas/propiedad/casa.svg', id_categoria: 2 },
+      { nombreEtiqueta: 'Casa', url_icono: '/logos_etiquetas/propiedad/casa.svg', id_categoria: 2 },
+      { nombreEtiqueta: 'Wi-fi alta velocidad', url_icono: '/logos_etiquetas/servicio/wifi_alta_velocidad.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Baño privado', url_icono: '/logos_etiquetas/servicio/baño_privado.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Amoblado', url_icono: '/logos_etiquetas/servicio/amoblado.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Calefacción', url_icono: '/logos_etiquetas/servicio/calefaccion.png', id_categoria: 3 },
+      { nombreEtiqueta: 'Lavandería', url_icono: '/logos_etiquetas/servicio/lavanderia.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Agua caliente', url_icono: '/logos_etiquetas/servicio/agua_caliente.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Cocina', url_icono: '/logos_etiquetas/servicio/cocina.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Parking', url_icono: '/logos_etiquetas/servicio/parking.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Aseo', url_icono: '/logos_etiquetas/servicio/aseo.svg', id_categoria: 3 },
+      { nombreEtiqueta: 'Pet-friendly', url_icono: '/logos_etiquetas/servicio/pet-friendly.svg', id_categoria: 3 },
     ];
 
-    for (const nombre of servicioLabels) {
+    for (const etiqueta of etiquetas) {
       try {
-        await etiquetaService.createEtiqueta({
-          nombreEtiqueta: nombre,
-          url_icono: 'https://cdn-icons-png.flaticon.com/512/219/219983.png',
-          id_categoria: 3,
-        });
+        await etiquetaService.createEtiqueta(etiqueta);
       } catch (e) {
-        console.log(`Etiqueta ${nombre}:`, (e as Error).message);
+        console.log(`Etiqueta ${etiqueta.nombreEtiqueta}:`, (e as Error).message);
       }
     }
 

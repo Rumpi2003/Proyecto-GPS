@@ -11,6 +11,10 @@ import HomeAdmin from "./pages/HomeAdmin.jsx";
 import SolicitudesPublicacion from "./pages/SolicitudesPublicacion.jsx";
 import ReportePublicaciones from "./pages/reportePublicaciones.jsx";
 import { ReporteComentarios } from "./pages/reporteComentario.jsx";
+import CrearPublicacion from "./pages/CrearPublicacion.jsx";
+import EditarPublicacion from "./pages/EditarPublicacion.jsx";
+import MisPublicaciones from "./pages/MisPublicaciones.jsx";
+import Publicacion from "./pages/Publicacion.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -20,7 +24,12 @@ createRoot(document.getElementById("root")).render(
           {/* Rutas Públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/map" element={<Map />} />
-          
+
+          <Route path="/publicar" element={<CrearPublicacion />} />
+          <Route path="/editar-publicacion/:id" element={<EditarPublicacion />} />
+          <Route path="/mis-publicaciones" element={<MisPublicaciones />} />
+          <Route path="/publicacion/:id_publicacion" element={<Publicacion />} />
+
           {/* Rutas Privadas del Administrador */}
           <Route 
             path="/admin" 
