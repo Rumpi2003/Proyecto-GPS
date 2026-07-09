@@ -333,8 +333,8 @@ export default function Publicacion() {
         <section className="bg-white rounded-panel shadow-soft border border-slate-100 p-6 md:p-8">
             <div className="w-full">
                 <div className="space-y-5">
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                        <h1 className="titulo text-[30px] leading-tight">
+                    <div className="flex items-start justify-between gap-3 flex-wrap min-w-0">
+                        <h1 className="titulo text-[30px] leading-tight flex-1 min-w-0 break-words [overflow-wrap:anywhere]">
                             {publicacion.titulo}
                         </h1>
 
@@ -402,7 +402,7 @@ export default function Publicacion() {
                     
 
 
-                    <p className="texto">
+                    <p className="texto break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
                         {publicacion.descripcion}
                     </p>
 

@@ -23,6 +23,17 @@ export class ComentarioService {
       throw new Error('BAD_REQUEST: Esta publicación tiene los comentarios deshabilitados');
     }
 
+    const cantidadComentariosUsuario = await this.comentarioRepo.count({
+      where: {
+        usuario: { id_usuario },
+        publicacion: { id_publicacion: data.id_publicacion },
+      },
+    });
+
+    if (cantidadComentariosUsuario >= 5) {
+      throw new Error('BAD_REQUEST: Ya alcanzaste el máximo de 5 comentarios en esta publicación');
+    }
+
     // RF_3: no hay límite de comentarios por usuario/publicación, se permite comentar múltiples veces
 
     // Crear el comentario
