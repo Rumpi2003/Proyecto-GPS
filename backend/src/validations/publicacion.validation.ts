@@ -6,11 +6,11 @@ export const createPublicacionSchema = Joi.object({
     'string.empty': 'La dirección es obligatoria',
     'any.required': 'La dirección es obligatoria',
   }),
-  titulo: Joi.string().min(3).max(255).required().messages({
+  titulo: Joi.string().min(3).max(50).required().messages({
     'string.empty': 'El título es obligatorio',
     'any.required': 'El título es obligatorio',
     'string.min': 'El título debe tener al menos 3 caracteres',
-    'string.max': 'El título no puede tener más de 255 caracteres',
+    'string.max': 'El título no puede tener más de 50 caracteres',
   }),
   descripcion: Joi.string().min(10).max(255).required().messages({
     'string.empty': 'La descripción es obligatoria',
@@ -18,10 +18,11 @@ export const createPublicacionSchema = Joi.object({
     'string.min': 'La descripción debe tener al menos 10 caracteres',
     'string.max': 'La descripción no puede tener más de 255 caracteres',
   }),
-  precio: Joi.number().integer().min(10000).required().messages({
+  precio: Joi.number().integer().min(10000).max(999999999999).required().messages({
     'number.base': 'El precio debe ser un número',
     'number.integer': 'El precio debe ser un número entero',
     'number.min': 'El precio debe tener al menos 5 dígitos (mínimo $10.000)',
+    'number.max': 'El precio no puede tener más de 12 dígitos',
     'any.required': 'El precio es obligatorio',
   }),
   telefono: Joi.string().trim().min(8).max(20).pattern(/^\+?\d+(?: \d+)*$/).required().messages({
@@ -36,18 +37,19 @@ export const createPublicacionSchema = Joi.object({
 });
 
 export const updatePublicacionSchema = Joi.object({
-  titulo: Joi.string().min(3).max(255).messages({
+  titulo: Joi.string().min(3).max(50).messages({
     'string.min': 'El título debe tener al menos 3 caracteres',
-    'string.max': 'El título no puede tener más de 255 caracteres',
+    'string.max': 'El título no puede tener más de 50 caracteres',
   }),
   descripcion: Joi.string().min(10).max(255).messages({
     'string.min': 'La descripción debe tener al menos 10 caracteres',
     'string.max': 'La descripción no puede tener más de 255 caracteres',
   }),
-  precio: Joi.number().integer().min(10000).messages({
+  precio: Joi.number().integer().min(10000).max(999999999999).messages({
     'number.base': 'El precio debe ser un número',
     'number.integer': 'El precio debe ser un número entero',
     'number.min': 'El precio debe tener al menos 5 dígitos (mínimo $10.000)',
+    'number.max': 'El precio no puede tener más de 12 dígitos',
   }),
   telefono: Joi.string().trim().min(8).max(20).pattern(/^\+?\d+(?: \d+)*$/).messages({
     'string.min': 'El teléfono debe tener al menos 8 caracteres',
